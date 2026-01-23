@@ -9,6 +9,9 @@ const PLAN_DAY_LABELS = {
     7: '周日'
 };
 
+// 存储当前正在进行的fetch请求
+let pendingRequests = [];
+
 document.addEventListener('DOMContentLoaded', function() {
     loadWeeklyPlan();
 });
@@ -333,4 +336,35 @@ function renderPlanDaySelect(recipeId, planDay) {
             ${optionHtml}
         </select>
     `;
+}
+
+/**
+ * 优化的返回首页函数
+ * 清理资源，取消请求，快速跳转
+ */
+function goBackHome() {
+    // 1. 取消所有未完成的fetch请求
+    pendingRequests.forEach(controller => {
+        try {
+            controller.abort();
+        } catch (e) {
+            // 忽略已经完成的请求
+        }
+    });
+    pendingRequests = [];
+
+    // 2. 停止所有CSS动画
+    const floatingBg = document.querySelector('.floating-food-bg');
+    if (floatingBg) {
+        floatingBg.style.display = 'none';
+    }
+
+    // 3. 清空页面内容减少内存占用
+    const container = document.getElementById('weeklyPlanContainer');
+    if (container) {
+        container.innerHTML = '';
+    }
+
+    // 4. 使用replace避免在历史记录中留痕，提升后退性能
+    window.location.replace('index.html');
 }

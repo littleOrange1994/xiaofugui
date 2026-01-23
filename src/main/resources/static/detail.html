@@ -8,7 +8,7 @@
 </head>
 <body>
     <!-- 头部 -->
-    <header class="header">
+    <header class="header" onclick="window.location.href='index.html'" style="cursor: pointer;" title="点击返回首页">
         <div class="container">
             <h1>小福贵儿</h1>
             <p>探索中华美食，品味家常味道</p>
@@ -18,7 +18,7 @@
     <!-- 详情内容 -->
     <div class="container detail-page">
         <!-- 返回按钮 -->
-        <a href="index.html" class="back-btn">
+        <a href="javascript:void(0)" onclick="goBackToList()" class="back-btn">
             <span>&larr;</span>
             <span>返回列表</span>
         </a>
@@ -32,7 +32,7 @@
         <div id="errorState" class="empty-state" style="display: none;">
             <div class="icon">😥</div>
             <p id="errorMessage">菜谱不存在</p>
-            <a href="index.html" class="back-btn" style="margin-top: 20px;">返回首页</a>
+            <a href="javascript:void(0)" onclick="goBackToList()" class="back-btn" style="margin-top: 20px;">返回列表</a>
         </div>
 
         <!-- 详情卡片 -->
@@ -94,6 +94,30 @@
 
         // 当前菜谱数据
         let currentRecipe = null;
+
+        /**
+         * 返回列表页并恢复之前的状态
+         * 读取URL中的page、category、search参数，构造返回URL
+         */
+        function goBackToList() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const page = urlParams.get('page') || '1';
+            const category = urlParams.get('category') || '';
+            const search = urlParams.get('search') || '';
+
+            // 构造返回URL，使用hash来传递状态
+            let backUrl = 'index.html';
+            const backParams = new URLSearchParams();
+            if (page !== '1') backParams.set('page', page);
+            if (category) backParams.set('category', category);
+            if (search) backParams.set('search', search);
+
+            if (backParams.toString()) {
+                backUrl += '#' + backParams.toString();
+            }
+
+            window.location.href = backUrl;
+        }
 
         // 页面加载时获取详情
         document.addEventListener('DOMContentLoaded', function() {

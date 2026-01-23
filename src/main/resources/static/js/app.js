@@ -14,11 +14,58 @@ const WEEKLY_PLAN_API_BASE = '/api/weekly-plan';
 
 // 页面加载时初始化
 document.addEventListener('DOMContentLoaded', function() {
+    // 先恢复从详情页返回时的状态
+    restoreStateFromHash();
+
     initFilterTags();
     initSearchInput();
     loadRecipes();
     loadWeeklyPlanCount();
 });
+
+/**
+ * 从URL hash中恢复页面状态
+ * 用于从详情页返回时恢复之前的页码、分类、搜索关键词
+ */
+function restoreStateFromHash() {
+    const hash = window.location.hash;
+    if (!hash || hash === '#') {
+        return;
+    }
+
+    // 去掉 # 号，解析参数
+    const params = new URLSearchParams(hash.substring(1));
+    const page = params.get('page');
+    const category = params.get('category');
+    const search = params.get('search');
+
+    // 恢复状态
+    if (page) {
+        state.currentPage = parseInt(page);
+    }
+    if (category) {
+        state.category = category;
+        // 激活对应的分类标签
+        const tags = document.querySelectorAll('.filter-tag');
+        tags.forEach(tag => {
+            if (tag.dataset.category === category) {
+                tag.classList.add('active');
+            } else {
+                tag.classList.remove('active');
+            }
+        });
+    }
+    if (search) {
+        state.searchKeyword = search;
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.value = search;
+        }
+    }
+
+    // 清除hash避免刷新时重复恢复
+    window.history.replaceState(null, '', window.location.pathname);
+}
 
 // 初始化筛选标签点击事件
 function initFilterTags() {
@@ -189,7 +236,17 @@ function changePage(delta) {
 
 // 查看菜谱详情
 function viewRecipe(id) {
-    window.location.href = `detail.html?id=${id}`;
+    // 保存当前页面状态到URL参数，方便返回时恢复
+    const params = new URLSearchParams();
+    params.set('id', id);
+    params.set('page', state.currentPage);
+    if (state.category) {
+        params.set('category', state.category);
+    }
+    if (state.searchKeyword) {
+        params.set('search', state.searchKeyword);
+    }
+    window.location.href = `detail.html?${params.toString()}`;
 }
 
 // 查看玉芳心愿单
@@ -325,7 +382,7 @@ async function showRandomRecipe() {
 
             // 设置查看详情按钮
             viewBtn.onclick = () => {
-                window.location.href = `detail.html?id=${randomRecipe.id}`;
+                viewRecipe(randomRecipe.id);
             };
         } else {
             preview.innerHTML = '<div style="padding: 40px; color: #999;">暂无推荐，请稍后再试</div>';
