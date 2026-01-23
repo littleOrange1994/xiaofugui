@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>玉芳心愿单 - 小福贵儿</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 头部 -->
+    <header class="header">
+        <div class="container">
+            <h1>小福贵儿</h1>
+            <p>玉芳心愿单 · 想吃的都先收起来</p>
+        </div>
+    </header>
+
+    <div class="container detail-page">
+        <a href="index.html" class="back-btn">
+            <span>&larr;</span>
+            <span>返回首页</span>
+        </a>
+
+        <div class="detail-section" style="margin-top: 10px;">
+            <h2>📅 玉芳心愿单</h2>
+            <p style="color:#888;margin-top:6px;">点击卡片可查看详情；也可以直接移除。</p>
+        </div>
+
+        <div id="weeklyPlanGrid" class="recipe-grid">
+            <!-- 动态填充 -->
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">加载中</div>
+
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <div class="icon">🫕</div>
+            <p>玉芳心愿单还是空的，去详情页加入一道菜吧</p>
+        </div>
+    </div>
+
+    <script src="js/week-plan.js"></script>
+</body>
+</html>
