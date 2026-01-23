@@ -54,6 +54,12 @@
                         <strong>养生功效：</strong>
                         <span id="healthBenefitText"></span>
                     </div>
+                    <div class="recommend-action" style="margin-top: 15px;">
+                        <button id="recommendBtn" class="recommend-toggle-btn" onclick="toggleRecommend()">
+                            <span id="recommendBtnIcon">⭐</span>
+                            <span id="recommendBtnText">添加到小曾推荐</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -79,6 +85,9 @@
         // API 基础路径
         const API_BASE = '/api/recipes';
 
+        // 当前菜谱数据
+        let currentRecipe = null;
+
         // 页面加载时获取详情
         document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -99,6 +108,7 @@
                 const result = await response.json();
 
                 if (result.code === 0 && result.data) {
+                    currentRecipe = result.data;
                     renderDetail(result.data);
                 } else {
                     showError(result.message || '菜谱不存在');
@@ -203,6 +213,9 @@
                 document.getElementById('healthBenefitText').textContent = recipe.healthBenefit;
             }
 
+            // 更新推荐按钮状态
+            updateRecommendButton(recipe.recommended);
+
             // 配料
             renderIngredients(recipe.ingredients);
 
@@ -305,6 +318,56 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        // 更新推荐按钮状态
+        function updateRecommendButton(isRecommended) {
+            const btn = document.getElementById('recommendBtn');
+            const icon = document.getElementById('recommendBtnIcon');
+            const text = document.getElementById('recommendBtnText');
+
+            if (isRecommended === 1) {
+                btn.classList.add('recommended');
+                icon.textContent = '✅';
+                text.textContent = '已加入小曾推荐';
+            } else {
+                btn.classList.remove('recommended');
+                icon.textContent = '⭐';
+                text.textContent = '添加到小曾推荐';
+            }
+        }
+
+        // 切换推荐状态
+        async function toggleRecommend() {
+            if (!currentRecipe) return;
+
+            const newStatus = currentRecipe.recommended === 1 ? 0 : 1;
+            const btn = document.getElementById('recommendBtn');
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE}/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: currentRecipe.id,
+                        recommended: newStatus
+                    })
+                });
+                const result = await response.json();
+
+                if (result.code === 0) {
+                    currentRecipe.recommended = newStatus;
+                    updateRecommendButton(newStatus);
+                } else {
+                    alert('操作失败：' + (result.message || '未知错误'));
+                }
+            } catch (error) {
+                console.error('切换推荐状态失败:', error);
+                alert('网络错误，请稍后重试');
+            } finally {
+                btn.disabled = false;
+            }
         }
     </script>
 </body>

@@ -7,17 +7,36 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- 飘浮美食装饰 -->
+    <!-- 飘浮锅碗瓢盆装饰 -->
     <div class="floating-food-bg">
+        <!-- 左侧 -->
+        <span class="food-item">🍳</span>
+        <span class="food-item">🥘</span>
+        <span class="food-item">🍲</span>
+        <span class="food-item">🥄</span>
         <span class="food-item">🥢</span>
+        <!-- 右侧 -->
+        <span class="food-item">🫕</span>
+        <span class="food-item">🍶</span>
+        <span class="food-item">🥣</span>
+        <span class="food-item">🍵</span>
+        <span class="food-item">🫖</span>
+        <!-- 额外装饰 -->
+        <span class="food-item">🥡</span>
+        <span class="food-item">🍽️</span>
+        <span class="food-item">🔪</span>
+        <span class="food-item">🧂</span>
+        <span class="food-item">🫙</span>
+        <!-- 更多装饰 -->
         <span class="food-item">🍜</span>
         <span class="food-item">🥟</span>
-        <span class="food-item">🍲</span>
-        <span class="food-item">🥡</span>
         <span class="food-item">🍚</span>
-        <span class="food-item">🥘</span>
-        <span class="food-item">🍤</span>
+        <span class="food-item">🍱</span>
+        <span class="food-item">🥮</span>
+        <span class="food-item">🧊</span>
+        <span class="food-item">🍡</span>
         <span class="food-item">🥗</span>
+        <span class="food-item">🍰</span>
         <span class="food-item">🧋</span>
     </div>
 
@@ -55,12 +74,29 @@
         </div>
     </div>
 
+    <!-- 小曾推荐 - 独立展示区 -->
+    <div class="container">
+        <div class="recommend-showcase">
+            <div class="recommend-btn-wrapper">
+                <button class="special-recommend-btn" onclick="showRecommendCategory()">
+                    <span class="recommend-icon">⭐</span>
+                    <span class="recommend-text">小曾推荐</span>
+                    <span class="recommend-badge">精选</span>
+                </button>
+                <div class="recommend-particles">
+                    <span>✨</span><span>⭐</span><span>✨</span><span>🌟</span><span>✨</span>
+                </div>
+            </div>
+            <p class="recommend-desc">小曾亲自挑选的美味佳肴，每一道都值得尝试！</p>
+        </div>
+    </div>
+
     <!-- 分类筛选 -->
     <div class="container">
         <div class="filter-section">
             <div class="filter-tags">
-                <span class="filter-tag" data-category="推荐">⭐ 小曾推荐</span>
                 <span class="filter-tag active" data-category="">🍽️ 全部</span>
+                <span class="filter-tag" data-category="川菜">🌶️ 川菜</span>
                 <span class="filter-tag" data-category="主食">🍚 主食</span>
                 <span class="filter-tag" data-category="炒菜">🥘 炒菜</span>
                 <span class="filter-tag" data-category="蒸菜">🫕 蒸菜</span>

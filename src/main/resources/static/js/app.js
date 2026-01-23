@@ -25,6 +25,11 @@ function initFilterTags() {
         tag.addEventListener('click', function() {
             // 移除所有 active 状态
             tags.forEach(t => t.classList.remove('active'));
+            // 移除推荐按钮的 active 状态
+            const recommendBtn = document.querySelector('.special-recommend-btn');
+            if (recommendBtn) {
+                recommendBtn.classList.remove('active');
+            }
             // 添加当前 active 状态
             this.classList.add('active');
             // 更新筛选条件
@@ -312,4 +317,35 @@ function closeRandomModal(event) {
     if (event.target.id === 'randomModal') {
         document.getElementById('randomModal').classList.remove('show');
     }
+}
+
+// ========== 小曾推荐功能 ==========
+
+// 显示小曾推荐分类
+function showRecommendCategory() {
+    console.log('小曾推荐被点击'); // 调试日志
+
+    // 重置筛选标签状态
+    const tags = document.querySelectorAll('.filter-tag');
+    tags.forEach(t => t.classList.remove('active'));
+
+    // 激活推荐按钮
+    const recommendBtn = document.querySelector('.special-recommend-btn');
+    if (recommendBtn) {
+        recommendBtn.classList.add('active');
+    }
+
+    // 清空搜索
+    document.getElementById('searchInput').value = '';
+
+    // 设置状态并加载
+    state.category = '推荐';
+    state.searchKeyword = '';
+    state.currentPage = 1;
+    loadRecipes();
+
+    // 滚动到菜谱列表
+    setTimeout(() => {
+        document.getElementById('recipeGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
 }
