@@ -12,6 +12,44 @@ body {
     color: #333;
     line-height: 1.6;
     min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ========== 飘浮美食背景装饰 ========== */
+.floating-food-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.floating-food-bg .food-item {
+    position: absolute;
+    font-size: 2rem;
+    opacity: 0.15;
+    animation: floatFood 20s ease-in-out infinite;
+}
+
+.floating-food-bg .food-item:nth-child(1) { left: 5%; top: 10%; animation-delay: 0s; animation-duration: 18s; }
+.floating-food-bg .food-item:nth-child(2) { left: 15%; top: 60%; animation-delay: 2s; animation-duration: 22s; }
+.floating-food-bg .food-item:nth-child(3) { left: 25%; top: 30%; animation-delay: 4s; animation-duration: 20s; }
+.floating-food-bg .food-item:nth-child(4) { left: 40%; top: 80%; animation-delay: 1s; animation-duration: 25s; }
+.floating-food-bg .food-item:nth-child(5) { left: 55%; top: 20%; animation-delay: 3s; animation-duration: 19s; }
+.floating-food-bg .food-item:nth-child(6) { left: 65%; top: 70%; animation-delay: 5s; animation-duration: 21s; }
+.floating-food-bg .food-item:nth-child(7) { left: 75%; top: 40%; animation-delay: 2.5s; animation-duration: 23s; }
+.floating-food-bg .food-item:nth-child(8) { left: 85%; top: 15%; animation-delay: 4.5s; animation-duration: 17s; }
+.floating-food-bg .food-item:nth-child(9) { left: 90%; top: 55%; animation-delay: 1.5s; animation-duration: 24s; }
+.floating-food-bg .food-item:nth-child(10) { left: 10%; top: 85%; animation-delay: 3.5s; animation-duration: 20s; }
+
+@keyframes floatFood {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-20px) rotate(10deg); }
+    50% { transform: translateY(0) rotate(0deg); }
+    75% { transform: translateY(20px) rotate(-10deg); }
 }
 
 .container {
@@ -31,7 +69,7 @@ body {
     overflow: hidden;
 }
 
-/* 中国风装饰背景 */
+/* 中国风装饰背景 + 闪烁星光 */
 .header::before {
     content: '';
     position: absolute;
@@ -40,10 +78,20 @@ body {
     right: 0;
     bottom: 0;
     background-image:
-        radial-gradient(circle at 10% 20%, rgba(255,215,0,0.1) 0%, transparent 20%),
-        radial-gradient(circle at 90% 80%, rgba(255,215,0,0.1) 0%, transparent 20%),
-        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, transparent 30%);
+        radial-gradient(circle at 10% 20%, rgba(255,215,0,0.2) 0%, transparent 15%),
+        radial-gradient(circle at 90% 80%, rgba(255,215,0,0.2) 0%, transparent 15%),
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 25%),
+        radial-gradient(circle at 20% 70%, rgba(255,215,0,0.15) 0%, transparent 10%),
+        radial-gradient(circle at 80% 30%, rgba(255,215,0,0.15) 0%, transparent 10%),
+        radial-gradient(circle at 30% 40%, rgba(255,255,255,0.2) 0%, transparent 5%),
+        radial-gradient(circle at 70% 60%, rgba(255,255,255,0.2) 0%, transparent 5%);
     pointer-events: none;
+    animation: sparkle 4s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
 }
 
 /* 祥云装饰 */
@@ -189,21 +237,79 @@ body {
     box-shadow: 0 4px 15px rgba(196, 30, 58, 0.08);
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     cursor: pointer;
-    border: 1px solid rgba(255, 200, 150, 0.2);
+    border: 2px solid transparent;
+    position: relative;
+    /* 入场动画 */
+    opacity: 0;
+    transform: translateY(30px);
+    animation: cardFadeIn 0.6s ease forwards;
+}
+
+/* 卡片入场动画延迟 */
+.recipe-card:nth-child(1) { animation-delay: 0.05s; }
+.recipe-card:nth-child(2) { animation-delay: 0.1s; }
+.recipe-card:nth-child(3) { animation-delay: 0.15s; }
+.recipe-card:nth-child(4) { animation-delay: 0.2s; }
+.recipe-card:nth-child(5) { animation-delay: 0.25s; }
+.recipe-card:nth-child(6) { animation-delay: 0.3s; }
+.recipe-card:nth-child(7) { animation-delay: 0.35s; }
+.recipe-card:nth-child(8) { animation-delay: 0.4s; }
+.recipe-card:nth-child(9) { animation-delay: 0.45s; }
+.recipe-card:nth-child(10) { animation-delay: 0.5s; }
+.recipe-card:nth-child(11) { animation-delay: 0.55s; }
+.recipe-card:nth-child(12) { animation-delay: 0.6s; }
+
+@keyframes cardFadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 渐变发光边框效果 */
+.recipe-card::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #ff6b6b, #feca57, #ff9ff3, #54a0ff, #5f27cd, #ff6b6b);
+    background-size: 400% 400%;
+    border-radius: 17px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    animation: gradientBorder 3s ease infinite;
+}
+
+@keyframes gradientBorder {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.recipe-card:hover::before {
+    opacity: 1;
 }
 
 .recipe-card:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 15px 35px rgba(196, 30, 58, 0.18);
-    border-color: rgba(231, 76, 60, 0.3);
+    transform: translateY(-10px) scale(1.03);
+    box-shadow: 0 20px 40px rgba(196, 30, 58, 0.25);
 }
 
 .recipe-card:hover img {
-    transform: scale(1.08);
+    transform: scale(1.1);
 }
 
 .recipe-card:hover .placeholder-img {
-    transform: scale(1.05);
+    transform: scale(1.08);
+}
+
+/* 图片容器 */
+.card-image-wrapper {
+    position: relative;
+    overflow: hidden;
+    height: 180px;
 }
 
 .recipe-card img {
@@ -211,6 +317,41 @@ body {
     height: 180px;
     object-fit: cover;
     transition: transform 0.4s ease;
+}
+
+/* 悬停覆盖层 */
+.card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(196, 30, 58, 0.85), rgba(139, 0, 0, 0.9));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.4s ease;
+}
+
+.recipe-card:hover .card-overlay {
+    opacity: 1;
+}
+
+.overlay-text {
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 12px 24px;
+    border: 2px solid white;
+    border-radius: 30px;
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+    letter-spacing: 2px;
+}
+
+.recipe-card:hover .overlay-text {
+    transform: translateY(0);
 }
 
 .recipe-card .placeholder-img {

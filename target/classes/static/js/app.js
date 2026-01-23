@@ -79,6 +79,9 @@ async function loadRecipes() {
         if (state.searchKeyword) {
             // 搜索模式
             url = `${API_BASE}/search?keyword=${encodeURIComponent(state.searchKeyword)}&page=${state.currentPage}&pageSize=${state.pageSize}`;
+        } else if (state.category === '推荐') {
+            // 推荐模式
+            url = `${API_BASE}/recommended?page=${state.currentPage}&pageSize=${state.pageSize}`;
         } else {
             // 列表模式
             url = `${API_BASE}?page=${state.currentPage}&pageSize=${state.pageSize}`;
@@ -121,10 +124,15 @@ function renderRecipes() {
 
     grid.innerHTML = state.recipes.map(recipe => `
         <div class="recipe-card" onclick="viewRecipe(${recipe.id})">
-            ${recipe.imageUrl
-                ? `<img src="${recipe.imageUrl}" alt="${recipe.name}" onerror="this.outerHTML='<div class=\\'placeholder-img\\'>🍲</div>'">`
-                : '<div class="placeholder-img">🍲</div>'
-            }
+            <div class="card-image-wrapper">
+                ${recipe.imageUrl
+                    ? `<img src="${recipe.imageUrl}" alt="${recipe.name}" onerror="this.outerHTML='<div class=\\'placeholder-img\\'>🍲</div>'">`
+                    : '<div class="placeholder-img">🍲</div>'
+                }
+                <div class="card-overlay">
+                    <span class="overlay-text">👀 查看详情</span>
+                </div>
+            </div>
             <div class="recipe-card-content">
                 <h3>${escapeHtml(recipe.name)}</h3>
                 <div class="recipe-card-meta">

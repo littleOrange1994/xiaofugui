@@ -77,4 +77,25 @@ public class RecipeService {
         }
         return recipeMapper.updateById(recipe) > 0;
     }
+
+    /**
+     * 删除菜品
+     */
+    public boolean deleteRecipe(Long id) {
+        if (id == null) {
+            return false;
+        }
+        return recipeMapper.deleteById(id) > 0;
+    }
+
+    /**
+     * 分页查询推荐菜谱列表
+     */
+    public PageResult<Recipe> listRecommended(Integer page, Integer pageSize) {
+        Page<Recipe> pageParam = new Page<>(page, pageSize);
+        QueryWrapper<Recipe> wrapper = new QueryWrapper<>();
+        wrapper.eq("recommended", 1);
+        Page<Recipe> result = recipeMapper.selectPage(pageParam, wrapper);
+        return new PageResult<>(result.getTotal(), result.getRecords());
+    }
 }

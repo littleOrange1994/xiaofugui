@@ -31,6 +31,17 @@ public class RecipeController {
     }
 
     /**
+     * 分页查询推荐菜谱列表
+     */
+    @GetMapping("/recommended")
+    public Result<PageResult<Recipe>> listRecommended(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "12") Integer pageSize) {
+        PageResult<Recipe> result = recipeService.listRecommended(page, pageSize);
+        return Result.success(result);
+    }
+
+    /**
      * 获取菜谱详情
      */
     @GetMapping("/{id}")
@@ -75,6 +86,18 @@ public class RecipeController {
         boolean success = recipeService.updateRecipe(recipe);
         if (!success) {
             return Result.error("菜品不存在或更新失败");
+        }
+        return Result.success();
+    }
+
+    /**
+     * 删除菜品
+     */
+    @PostMapping("/delete/{id}")
+    public Result<Void> deleteRecipe(@PathVariable Long id) {
+        boolean success = recipeService.deleteRecipe(id);
+        if (!success) {
+            return Result.error("菜品不存在或删除失败");
         }
         return Result.success();
     }

@@ -53,6 +53,8 @@ public class Recipe {
 
     private LocalDateTime updateTime;
 
+    private Integer recommended;
+
     @TableLogic
     private Integer deleted;
 }
