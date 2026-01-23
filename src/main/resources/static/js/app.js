@@ -10,12 +10,14 @@ const state = {
 
 // API 基础路径
 const API_BASE = '/api/recipes';
+const WEEKLY_PLAN_API_BASE = '/api/weekly-plan';
 
 // 页面加载时初始化
 document.addEventListener('DOMContentLoaded', function() {
     initFilterTags();
     initSearchInput();
     loadRecipes();
+    loadWeeklyPlanCount();
 });
 
 // 初始化筛选标签点击事件
@@ -193,6 +195,23 @@ function viewRecipe(id) {
 // 查看玉芳心愿单
 function viewWeeklyPlan() {
     window.location.href = 'week-plan.html';
+}
+
+// 加载玉芳心愿单数量
+async function loadWeeklyPlanCount() {
+    const btn = document.getElementById('weeklyPlanHomeBtn');
+    if (!btn) return;
+
+    try {
+        const response = await fetch(`${WEEKLY_PLAN_API_BASE}/count`);
+        const result = await response.json();
+        if (result.code === 0) {
+            const count = Number(result.data || 0);
+            btn.textContent = count > 0 ? `📅 玉芳心愿单(${count})` : '📅 玉芳心愿单';
+        }
+    } catch (error) {
+        console.error('加载玉芳心愿单数量失败:', error);
+    }
 }
 
 // 显示/隐藏加载状态

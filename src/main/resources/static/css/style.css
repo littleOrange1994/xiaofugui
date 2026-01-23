@@ -1447,3 +1447,122 @@ body::before {
     background: #ff6b6b;
     color: #fff;
 }
+
+.weekly-plan-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.weekly-clear-btn {
+    padding: 10px 16px;
+    border-radius: 22px;
+    border: 1px solid #e74c3c;
+    background: #fff;
+    color: #e74c3c;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    flex: 0 0 auto;
+}
+
+.weekly-clear-btn:hover {
+    background: #e74c3c;
+    color: #fff;
+}
+
+.weekly-plan-container {
+    margin-top: 10px;
+}
+
+.weekly-plan-section {
+    margin-top: 18px;
+}
+
+.weekly-plan-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding: 0 4px;
+}
+
+.weekly-plan-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+}
+
+.weekly-plan-section-count {
+    font-size: 13px;
+    color: #888;
+}
+
+.weekly-plan-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.weekly-plan-label {
+    font-size: 13px;
+    color: #666;
+    flex: 0 0 auto;
+}
+
+.weekly-plan-select {
+    padding: 6px 10px;
+    border-radius: 14px;
+    border: 1px solid #e0e0e0;
+    background: #fff;
+    font-size: 13px;
+    outline: none;
+}
+
+.weekly-plan-select:focus {
+    border-color: #2ecc71;
+}
+
+.weekly-plan-remark {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.weekly-remark-input {
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 14px;
+    border: 1px solid #e0e0e0;
+    font-size: 13px;
+    outline: none;
+}
+
+.weekly-remark-input:focus {
+    border-color: #2ecc71;
+}
+
+.weekly-remark-save {
+    padding: 8px 12px;
+    border-radius: 14px;
+    border: 1px solid #2ecc71;
+    background: #fff;
+    color: #27ae60;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s ease;
+    flex: 0 0 auto;
+}
+
+.weekly-remark-save:hover {
+    background: #2ecc71;
+    color: #fff;
+}
+
+.weekly-remark-save:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

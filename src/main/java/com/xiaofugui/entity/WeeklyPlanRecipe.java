@@ -22,6 +22,16 @@ public class WeeklyPlanRecipe {
 
     private Long recipeId;
 
+    /**
+     * 分配到周几：1=周一...7=周日，NULL=未分配
+     */
+    private Integer planDay;
+
+    /**
+     * 备注（最多 200 字）
+     */
+    private String remark;
+
     private LocalDateTime createTime;
 
     private LocalDateTime updateTime;
@@ -29,4 +39,3 @@ public class WeeklyPlanRecipe {
     @TableLogic
     private Integer deleted;
 }
-
