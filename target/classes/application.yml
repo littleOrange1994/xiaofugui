@@ -25,5 +25,4 @@ mybatis-plus:
 # 菜谱导入配置
 recipe:
   import:
-    enabled: true
-    source-dir: /Users/pomazhangfei/Documents/CookLikeHOC
+    enabled: false

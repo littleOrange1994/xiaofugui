@@ -26,4 +26,3 @@ mybatis-plus:
 recipe:
   import:
     enabled: false
-    source-dir: /Users/pomazhangfei/Documents/CookLikeHOC

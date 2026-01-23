@@ -24,9 +24,9 @@ public class RecipeController {
     public Result<PageResult<Recipe>> listRecipes(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "12") Integer pageSize,
-            @RequestParam(required = false) String cuisineType) {
+            @RequestParam(required = false) String category) {
 
-        PageResult<Recipe> result = recipeService.listRecipes(page, pageSize, cuisineType);
+        PageResult<Recipe> result = recipeService.listRecipes(page, pageSize, category);
         return Result.success(result);
     }
 

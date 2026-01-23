@@ -21,12 +21,12 @@ public class RecipeService {
     /**
      * 分页查询菜谱列表
      */
-    public PageResult<Recipe> listRecipes(Integer page, Integer pageSize, String cuisineType) {
+    public PageResult<Recipe> listRecipes(Integer page, Integer pageSize, String category) {
         Page<Recipe> pageParam = new Page<>(page, pageSize);
         QueryWrapper<Recipe> wrapper = new QueryWrapper<>();
 
-        if (StrUtil.isNotBlank(cuisineType)) {
-            wrapper.eq("cuisine_type", cuisineType);
+        if (StrUtil.isNotBlank(category)) {
+            wrapper.eq("category", category);
         }
 
         Page<Recipe> result = recipeMapper.selectPage(pageParam, wrapper);

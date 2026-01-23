@@ -1,6 +1,6 @@
 package com.xiaofugui.runner;
 
-import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -10,21 +10,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 菜谱数据导入
+ * 菜谱数据导入（支持从 classpath 读取）
  */
 @Slf4j
 @Component
@@ -36,10 +36,27 @@ public class RecipeImportRunner implements CommandLineRunner {
     @Value("${recipe.import.enabled:false}")
     private boolean importEnabled;
 
-    @Value("${recipe.import.source-dir:/Users/pomazhangfei/Documents/CookLikeHOC}")
-    private String sourceDir;
-
     private static final Pattern IMAGE_PATTERN = Pattern.compile("!\\[.*?]\\(\\.\\./(images/[^)]+)\\)");
+
+    private static final Map<String, String> CATEGORY_MAP = new HashMap<>();
+
+    static {
+        CATEGORY_MAP.put("主食", "主食");
+        CATEGORY_MAP.put("凉拌", "凉拌");
+        CATEGORY_MAP.put("卤菜", "卤菜");
+        CATEGORY_MAP.put("早餐", "早餐");
+        CATEGORY_MAP.put("汤", "汤类");
+        CATEGORY_MAP.put("炒菜", "炒菜");
+        CATEGORY_MAP.put("炖菜", "炖菜");
+        CATEGORY_MAP.put("炸品", "炸品");
+        CATEGORY_MAP.put("烤类", "烤类");
+        CATEGORY_MAP.put("烫菜", "烫菜");
+        CATEGORY_MAP.put("煮锅", "煮锅");
+        CATEGORY_MAP.put("砂锅菜", "砂锅菜");
+        CATEGORY_MAP.put("蒸菜", "蒸菜");
+        CATEGORY_MAP.put("配料", "配料");
+        CATEGORY_MAP.put("饮品", "饮品");
+    }
 
     @Override
     public void run(String... args) {
@@ -48,84 +65,60 @@ public class RecipeImportRunner implements CommandLineRunner {
             return;
         }
 
-        log.info("开始导入菜谱数据，源目录: {}", sourceDir);
-
-        // 获取已存在的菜谱名称（用于去重）
-        Set<String> existingNames = new HashSet<>();
-        recipeMapper.selectList(null).forEach(r -> existingNames.add(r.getName()));
-        log.info("数据库已有 {} 条菜谱", existingNames.size());
-
-        // 分类目录映射
-        Map<String, String> categoryMap = new HashMap<>();
-        categoryMap.put("主食", "主食");
-        categoryMap.put("凉拌", "凉拌");
-        categoryMap.put("卤菜", "卤菜");
-        categoryMap.put("早餐", "早餐");
-        categoryMap.put("汤", "汤类");
-        categoryMap.put("炒菜", "炒菜");
-        categoryMap.put("炖菜", "炖菜");
-        categoryMap.put("炸品", "炸品");
-        categoryMap.put("烤类", "烤类");
-        categoryMap.put("烫菜", "烫菜");
-        categoryMap.put("煮锅", "煮锅");
-        categoryMap.put("砂锅菜", "砂锅菜");
-        categoryMap.put("蒸菜", "蒸菜");
-        categoryMap.put("配料", "配料");
-        categoryMap.put("饮品", "饮品");
+        log.info("开始从 classpath 导入菜谱数据");
 
         int importCount = 0;
         int updateCount = 0;
         int skipCount = 0;
 
-        for (Map.Entry<String, String> entry : categoryMap.entrySet()) {
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+
+        for (Map.Entry<String, String> entry : CATEGORY_MAP.entrySet()) {
             String dirName = entry.getKey();
             String category = entry.getValue();
-            File dir = new File(sourceDir, dirName);
 
-            if (!dir.exists() || !dir.isDirectory()) {
-                continue;
-            }
+            try {
+                String pattern = "classpath:recipes/" + dirName + "/*.md";
+                Resource[] resources = resolver.getResources(pattern);
 
-            File[] files = dir.listFiles((d, name) -> name.endsWith(".md"));
-            if (files == null) {
-                continue;
-            }
-
-            for (File file : files) {
-                try {
-                    Recipe recipe = parseMarkdownFile(file, category);
-                    if (recipe == null) {
-                        continue;
-                    }
-
-                    // 检查是否已存在
-                    QueryWrapper<Recipe> wrapper = new QueryWrapper<>();
-                    wrapper.eq("name", recipe.getName());
-                    Recipe existing = recipeMapper.selectOne(wrapper);
-
-                    if (existing != null) {
-                        // 更新已存在的记录（补充配料和步骤）
-                        if (needsUpdate(existing, recipe)) {
-                            existing.setIngredients(recipe.getIngredients());
-                            existing.setSteps(recipe.getSteps());
-                            if (StrUtil.isNotBlank(recipe.getImageUrl())) {
-                                existing.setImageUrl(recipe.getImageUrl());
-                            }
-                            recipeMapper.updateById(existing);
-                            updateCount++;
-                            log.debug("更新菜谱: {}", recipe.getName());
-                        } else {
-                            skipCount++;
+                for (Resource resource : resources) {
+                    try {
+                        Recipe recipe = parseMarkdownResource(resource, category);
+                        if (recipe == null) {
+                            continue;
                         }
-                    } else {
-                        // 插入新记录
-                        recipeMapper.insert(recipe);
-                        importCount++;
-                        log.debug("导入菜谱: {}", recipe.getName());
+
+                        // 检查是否已存在（按名称去重）
+                        QueryWrapper<Recipe> wrapper = new QueryWrapper<>();
+                        wrapper.eq("name", recipe.getName());
+                        Recipe existing = recipeMapper.selectOne(wrapper);
+
+                        if (existing != null) {
+                            // 更新已存在的记录
+                            if (needsUpdate(existing, recipe)) {
+                                existing.setIngredients(recipe.getIngredients());
+                                existing.setSteps(recipe.getSteps());
+                                if (StrUtil.isNotBlank(recipe.getImageUrl())) {
+                                    existing.setImageUrl(recipe.getImageUrl());
+                                }
+                                recipeMapper.updateById(existing);
+                                updateCount++;
+                                log.debug("更新菜谱: {}", recipe.getName());
+                            } else {
+                                skipCount++;
+                            }
+                        } else {
+                            // 插入新记录
+                            recipeMapper.insert(recipe);
+                            importCount++;
+                            log.debug("导入菜谱: {}", recipe.getName());
+                        }
+                    } catch (Exception e) {
+                        log.error("解析文件失败: {}", resource.getFilename(), e);
                     }
-                } catch (Exception e) {
-                    log.error("解析文件失败: {}", file.getAbsolutePath(), e);
                 }
+            } catch (Exception e) {
+                log.warn("扫描目录失败: {}", dirName, e);
             }
         }
 
@@ -136,7 +129,6 @@ public class RecipeImportRunner implements CommandLineRunner {
      * 检查是否需要更新
      */
     private boolean needsUpdate(Recipe existing, Recipe newRecipe) {
-        // 如果现有记录的配料或步骤为空，需要更新
         boolean ingredientsEmpty = StrUtil.isBlank(existing.getIngredients()) || "[]".equals(existing.getIngredients());
         boolean stepsEmpty = StrUtil.isBlank(existing.getSteps()) || "[]".equals(existing.getSteps());
         boolean newIngredientsNotEmpty = StrUtil.isNotBlank(newRecipe.getIngredients()) && !"[]".equals(newRecipe.getIngredients());
@@ -146,10 +138,14 @@ public class RecipeImportRunner implements CommandLineRunner {
     }
 
     /**
-     * 解析 Markdown 文件
+     * 解析 Markdown 资源
      */
-    private Recipe parseMarkdownFile(File file, String category) {
-        String content = FileUtil.readString(file, StandardCharsets.UTF_8);
+    private Recipe parseMarkdownResource(Resource resource, String category) throws Exception {
+        String content;
+        try (InputStream is = resource.getInputStream()) {
+            content = IoUtil.read(is, StandardCharsets.UTF_8);
+        }
+
         if (StrUtil.isBlank(content)) {
             return null;
         }
@@ -161,7 +157,7 @@ public class RecipeImportRunner implements CommandLineRunner {
 
         Recipe recipe = new Recipe();
 
-        // 解析菜名（第一行 # 标题）
+        // 解析菜名
         String name = null;
         for (String line : lines) {
             line = line.trim();
@@ -172,19 +168,18 @@ public class RecipeImportRunner implements CommandLineRunner {
         }
 
         if (StrUtil.isBlank(name)) {
-            // 使用文件名作为菜名
-            name = file.getName().replace(".md", "");
+            String filename = resource.getFilename();
+            name = filename != null ? filename.replace(".md", "") : "未知菜品";
         }
         recipe.setName(name);
         recipe.setCategory(category);
         recipe.setCuisineType("OTHER");
-        recipe.setSourceFile(file.getAbsolutePath());
+        recipe.setSourceFile(resource.getFilename());
 
-        // 解析图片 (格式: ../images/xxx.png -> /images/xxx.png)
+        // 解析图片
         Matcher imageMatcher = IMAGE_PATTERN.matcher(content);
         if (imageMatcher.find()) {
             String imagePath = imageMatcher.group(1);
-            // imagePath 是 "images/xxx.png"，转为 "/images/xxx.png"
             recipe.setImageUrl("/" + imagePath);
         }
 
@@ -196,7 +191,6 @@ public class RecipeImportRunner implements CommandLineRunner {
         for (String line : lines) {
             line = line.trim();
 
-            // 检测章节标题
             if (line.startsWith("## ")) {
                 String sectionTitle = line.substring(3).trim();
                 if (sectionTitle.contains("配料") || sectionTitle.contains("成分") || sectionTitle.contains("用料") || sectionTitle.contains("材料")) {
@@ -209,10 +203,8 @@ public class RecipeImportRunner implements CommandLineRunner {
                 continue;
             }
 
-            // 解析列表项
             if (line.startsWith("- ") || line.startsWith("* ")) {
                 String item = line.substring(2).trim();
-                // 移除步骤编号前缀 (如 "1. ", "2. ")
                 item = item.replaceFirst("^\\d+[.、．]\\s*", "");
 
                 if ("ingredients".equals(currentSection) && StrUtil.isNotBlank(item)) {
@@ -223,7 +215,6 @@ public class RecipeImportRunner implements CommandLineRunner {
             }
         }
 
-        // 转为 JSON 数组存储
         recipe.setIngredients(JSONUtil.toJsonStr(ingredients));
         recipe.setSteps(JSONUtil.toJsonStr(steps));
 

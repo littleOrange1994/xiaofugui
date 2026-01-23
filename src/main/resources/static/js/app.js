@@ -4,7 +4,7 @@ const state = {
     currentPage: 1,
     pageSize: 12,
     total: 0,
-    cuisineType: '',
+    category: '',
     searchKeyword: ''
 };
 
@@ -28,7 +28,7 @@ function initFilterTags() {
             // 添加当前 active 状态
             this.classList.add('active');
             // 更新筛选条件
-            state.cuisineType = this.dataset.cuisine;
+            state.category = this.dataset.category;
             state.currentPage = 1;
             state.searchKeyword = '';
             document.getElementById('searchInput').value = '';
@@ -59,13 +59,13 @@ function searchRecipes() {
     }
 
     state.searchKeyword = keyword;
-    state.cuisineType = '';
+    state.category = '';
     state.currentPage = 1;
 
     // 重置筛选标签状态
     const tags = document.querySelectorAll('.filter-tag');
     tags.forEach(t => t.classList.remove('active'));
-    document.querySelector('.filter-tag[data-cuisine=""]').classList.add('active');
+    document.querySelector('.filter-tag[data-category=""]').classList.add('active');
 
     loadRecipes();
 }
@@ -82,8 +82,8 @@ async function loadRecipes() {
         } else {
             // 列表模式
             url = `${API_BASE}?page=${state.currentPage}&pageSize=${state.pageSize}`;
-            if (state.cuisineType) {
-                url += `&cuisineType=${encodeURIComponent(state.cuisineType)}`;
+            if (state.category) {
+                url += `&category=${encodeURIComponent(state.category)}`;
             }
         }
 
@@ -128,8 +128,7 @@ function renderRecipes() {
             <div class="recipe-card-content">
                 <h3>${escapeHtml(recipe.name)}</h3>
                 <div class="recipe-card-meta">
-                    ${recipe.cuisineType ? `<span class="meta-tag cuisine">${escapeHtml(recipe.cuisineType)}</span>` : ''}
-                    ${recipe.cookingTime ? `<span class="meta-tag time">${recipe.cookingTime}分钟</span>` : ''}
+                    ${recipe.category ? `<span class="meta-tag cuisine">${escapeHtml(recipe.category)}</span>` : ''}
                     ${recipe.difficulty ? `<span class="meta-tag difficulty">${getDifficultyText(recipe.difficulty)}</span>` : ''}
                 </div>
                 <div class="recipe-card-footer">
