@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>菜谱详情 - 小富贵菜谱</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 头部 -->
+    <header class="header">
+        <div class="container">
+            <h1>小富贵菜谱</h1>
+            <p>探索中华美食，品味家常味道</p>
+        </div>
+    </header>
+
+    <!-- 详情内容 -->
+    <div class="container detail-page">
+        <!-- 返回按钮 -->
+        <a href="index.html" class="back-btn">
+            <span>&larr;</span>
+            <span>返回列表</span>
+        </a>
+
+        <!-- 加载状态 -->
+        <div id="loading" class="loading">
+            加载中
+        </div>
+
+        <!-- 错误状态 -->
+        <div id="errorState" class="empty-state" style="display: none;">
+            <div class="icon">😥</div>
+            <p id="errorMessage">菜谱不存在</p>
+            <a href="index.html" class="back-btn" style="margin-top: 20px;">返回首页</a>
+        </div>
+
+        <!-- 详情卡片 -->
+        <div id="detailCard" class="detail-card" style="display: none;">
+            <!-- 头部信息 -->
+            <div class="detail-header">
+                <div class="detail-image">
+                    <div id="recipeImage"></div>
+                </div>
+                <div class="detail-info">
+                    <h1 id="recipeName">菜品名称</h1>
+                    <div class="detail-meta" id="recipeMeta">
+                        <!-- 标签动态生成 -->
+                    </div>
+                    <div class="detail-stats" id="recipeStats">
+                        <!-- 统计信息动态生成 -->
+                    </div>
+                    <div id="healthBenefit" style="display: none;">
+                        <strong>养生功效：</strong>
+                        <span id="healthBenefitText"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 配料 -->
+            <div class="detail-section">
+                <h2>📦 配料清单</h2>
+                <div id="ingredientsList" class="ingredients-list">
+                    <!-- 配料动态生成 -->
+                </div>
+            </div>
+
+            <!-- 步骤 -->
+            <div class="detail-section">
+                <h2>👨‍🍳 制作步骤</h2>
+                <div id="stepsList" class="steps-list">
+                    <!-- 步骤动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API 基础路径
+        const API_BASE = '/api/recipes';
+
+        // 页面加载时获取详情
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+
+            if (!id) {
+                showError('缺少菜谱 ID');
+                return;
+            }
+
+            loadRecipeDetail(id);
+        });
+
+        // 加载菜谱详情
+        async function loadRecipeDetail(id) {
+            try {
+                const response = await fetch(`${API_BASE}/${id}`);
+                const result = await response.json();
+
+                if (result.code === 0 && result.data) {
+                    renderDetail(result.data);
+                } else {
+                    showError(result.message || '菜谱不存在');
+                }
+            } catch (error) {
+                console.error('加载菜谱详情失败:', error);
+                showError('网络错误，请稍后重试');
+            }
+        }
+
+        // 渲染详情
+        function renderDetail(recipe) {
+            // 隐藏加载状态
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('detailCard').style.display = 'block';
+
+            // 更新页面标题
+            document.title = `${recipe.name} - 小富贵菜谱`;
+
+            // 图片
+            const imageContainer = document.getElementById('recipeImage');
+            if (recipe.imageUrl) {
+                imageContainer.innerHTML = `<img src="${recipe.imageUrl}" alt="${escapeHtml(recipe.name)}" onerror="this.outerHTML='<div class=\\'placeholder-img\\'>🍲</div>'">`;
+            } else {
+                imageContainer.innerHTML = '<div class="placeholder-img">🍲</div>';
+            }
+
+            // 名称
+            document.getElementById('recipeName').textContent = recipe.name;
+
+            // 标签
+            const metaHtml = [];
+            if (recipe.cuisineType) {
+                metaHtml.push(`<span class="meta-tag cuisine">${escapeHtml(recipe.cuisineType)}</span>`);
+            }
+            if (recipe.category) {
+                metaHtml.push(`<span class="meta-tag">${escapeHtml(recipe.category)}</span>`);
+            }
+            if (recipe.seasonTags) {
+                recipe.seasonTags.split(/[,，]/).forEach(tag => {
+                    if (tag.trim()) {
+                        metaHtml.push(`<span class="meta-tag">${escapeHtml(tag.trim())}</span>`);
+                    }
+                });
+            }
+            if (recipe.festivalTags) {
+                recipe.festivalTags.split(/[,，]/).forEach(tag => {
+                    if (tag.trim()) {
+                        metaHtml.push(`<span class="meta-tag">${escapeHtml(tag.trim())}</span>`);
+                    }
+                });
+            }
+            document.getElementById('recipeMeta').innerHTML = metaHtml.join('');
+
+            // 统计信息
+            const statsHtml = [];
+            if (recipe.cookingTime) {
+                statsHtml.push(`
+                    <div class="stat-item">
+                        <div class="label">烹饪时间</div>
+                        <div class="value">${recipe.cookingTime}分钟</div>
+                    </div>
+                `);
+            }
+            if (recipe.difficulty) {
+                statsHtml.push(`
+                    <div class="stat-item">
+                        <div class="label">难度等级</div>
+                        <div class="value">${getDifficultyText(recipe.difficulty)}</div>
+                    </div>
+                `);
+            }
+            if (recipe.spicyLevel !== null && recipe.spicyLevel !== undefined) {
+                statsHtml.push(`
+                    <div class="stat-item">
+                        <div class="label">辣度</div>
+                        <div class="value">${getSpicyLevel(recipe.spicyLevel)}</div>
+                    </div>
+                `);
+            }
+            if (recipe.recommendScore) {
+                statsHtml.push(`
+                    <div class="stat-item">
+                        <div class="label">推荐指数</div>
+                        <div class="value">${getRecommendScore(recipe.recommendScore)}</div>
+                    </div>
+                `);
+            }
+            if (recipe.marketPrice) {
+                statsHtml.push(`
+                    <div class="stat-item">
+                        <div class="label">参考价格</div>
+                        <div class="value">¥${recipe.marketPrice}</div>
+                    </div>
+                `);
+            }
+            document.getElementById('recipeStats').innerHTML = statsHtml.join('');
+
+            // 养生功效
+            if (recipe.healthBenefit) {
+                document.getElementById('healthBenefit').style.display = 'block';
+                document.getElementById('healthBenefitText').textContent = recipe.healthBenefit;
+            }
+
+            // 配料
+            renderIngredients(recipe.ingredients);
+
+            // 步骤
+            renderSteps(recipe.steps);
+        }
+
+        // 解析数据（支持 JSON 数组和普通文本格式）
+        function parseDataToArray(str, textDelimiter) {
+            if (!str || str === '[]') {
+                return [];
+            }
+
+            // 尝试 JSON 解析
+            try {
+                const parsed = JSON.parse(str);
+                if (Array.isArray(parsed)) {
+                    return parsed.filter(item => item && String(item).trim());
+                }
+            } catch (e) {
+                // 非 JSON 格式，使用文本分割
+            }
+
+            // 文本分割
+            return str.split(textDelimiter).filter(item => item && item.trim());
+        }
+
+        // 渲染配料
+        function renderIngredients(ingredientsStr) {
+            const container = document.getElementById('ingredientsList');
+
+            const ingredients = parseDataToArray(ingredientsStr, /[,，;；\n]/);
+
+            if (ingredients.length === 0) {
+                container.innerHTML = '<p style="color: #999;">暂无配料信息</p>';
+                return;
+            }
+
+            container.innerHTML = ingredients.map(item => `
+                <div class="ingredient-item">${escapeHtml(String(item).trim())}</div>
+            `).join('');
+        }
+
+        // 渲染步骤
+        function renderSteps(stepsStr) {
+            const container = document.getElementById('stepsList');
+
+            // 先尝试 JSON 解析
+            let steps = parseDataToArray(stepsStr, /\n/);
+
+            // 如果不是 JSON 且有数字序号格式，用序号分割
+            if (steps.length === 1 && /\d+[.、．]\s*/.test(stepsStr)) {
+                steps = stepsStr.split(/\d+[.、．]\s*/).filter(item => item && item.trim());
+            }
+
+            if (steps.length === 0) {
+                container.innerHTML = '<p style="color: #999;">暂无步骤信息</p>';
+                return;
+            }
+
+            container.innerHTML = steps.map(step => `
+                <div class="step-item">
+                    <div class="step-content">${escapeHtml(String(step).trim())}</div>
+                </div>
+            `).join('');
+        }
+
+        // 显示错误
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+            document.getElementById('errorMessage').textContent = message;
+        }
+
+        // 获取难度文字
+        function getDifficultyText(level) {
+            const texts = ['', '简单', '普通', '较难', '困难', '大师级'];
+            return texts[level] || '未知';
+        }
+
+        // 获取辣度显示
+        function getSpicyLevel(level) {
+            if (!level || level === 0) return '不辣';
+            return '🌶️'.repeat(Math.min(level, 5));
+        }
+
+        // 获取推荐星级
+        function getRecommendScore(score) {
+            if (!score) return '-';
+            const fullStars = Math.floor(score / 2);
+            const halfStar = score % 2 >= 1;
+            let stars = '⭐'.repeat(fullStars);
+            if (halfStar) stars += '✨';
+            return stars || '-';
+        }
+
+        // HTML 转义
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
