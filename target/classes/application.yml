@@ -10,7 +10,7 @@ spring:
     username: root
     password: caicaicai123
   profiles:
-    active: dev
+    active: prod
 
 mybatis-plus:
   configuration:
@@ -21,3 +21,9 @@ mybatis-plus:
       logic-delete-field: deleted
       logic-delete-value: 1
       logic-not-delete-value: 0
+
+# 菜谱导入配置
+recipe:
+  import:
+    enabled: true
+    source-dir: /Users/pomazhangfei/Documents/CookLikeHOC
