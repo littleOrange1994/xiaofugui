@@ -190,6 +190,11 @@ function viewRecipe(id) {
     window.location.href = `detail.html?id=${id}`;
 }
 
+// 查看玉芳心愿单
+function viewWeeklyPlan() {
+    window.location.href = 'week-plan.html';
+}
+
 // 显示/隐藏加载状态
 function showLoading(show) {
     const loading = document.getElementById('loading');

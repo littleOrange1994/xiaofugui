@@ -60,6 +60,12 @@
                             <span id="recommendBtnText">添加到小曾推荐</span>
                         </button>
                     </div>
+                    <div class="recommend-action" style="margin-top: 10px;">
+                        <button id="weeklyPlanBtn" class="recommend-toggle-btn weekly-plan-toggle-btn" onclick="toggleWeeklyPlan()">
+                            <span id="weeklyPlanBtnIcon">📅</span>
+                            <span id="weeklyPlanBtnText">加入玉芳心愿单</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -84,6 +90,7 @@
     <script>
         // API 基础路径
         const API_BASE = '/api/recipes';
+        const WEEKLY_PLAN_API_BASE = '/api/weekly-plan';
 
         // 当前菜谱数据
         let currentRecipe = null;
@@ -110,6 +117,7 @@
                 if (result.code === 0 && result.data) {
                     currentRecipe = result.data;
                     renderDetail(result.data);
+                    loadWeeklyPlanStatus(result.data.id);
                 } else {
                     showError(result.message || '菜谱不存在');
                 }
@@ -364,6 +372,69 @@
                 }
             } catch (error) {
                 console.error('切换推荐状态失败:', error);
+                alert('网络错误，请稍后重试');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // 更新本周计划按钮状态
+        function updateWeeklyPlanButton(inWeeklyPlan) {
+            const btn = document.getElementById('weeklyPlanBtn');
+            const icon = document.getElementById('weeklyPlanBtnIcon');
+            const text = document.getElementById('weeklyPlanBtnText');
+
+            if (inWeeklyPlan) {
+                btn.classList.add('recommended');
+                icon.textContent = '✅';
+                text.textContent = '已加入玉芳心愿单';
+            } else {
+                btn.classList.remove('recommended');
+                icon.textContent = '📅';
+                text.textContent = '加入玉芳心愿单';
+            }
+        }
+
+        // 加载本周计划状态
+        async function loadWeeklyPlanStatus(recipeId) {
+            if (!recipeId) return;
+            try {
+                const response = await fetch(`${WEEKLY_PLAN_API_BASE}/exists?recipeId=${recipeId}`);
+                const result = await response.json();
+                if (result.code === 0) {
+                    currentRecipe.inWeeklyPlan = !!result.data;
+                    updateWeeklyPlanButton(currentRecipe.inWeeklyPlan);
+                }
+            } catch (error) {
+                console.error('加载本周计划状态失败:', error);
+            }
+        }
+
+        // 切换本周计划状态
+        async function toggleWeeklyPlan() {
+            if (!currentRecipe) return;
+
+            const btn = document.getElementById('weeklyPlanBtn');
+            btn.disabled = true;
+
+            const api = currentRecipe.inWeeklyPlan ? `${WEEKLY_PLAN_API_BASE}/remove` : `${WEEKLY_PLAN_API_BASE}/add`;
+
+            try {
+                const response = await fetch(api, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ recipeId: currentRecipe.id })
+                });
+                const result = await response.json();
+
+                if (result.code === 0) {
+                    currentRecipe.inWeeklyPlan = !currentRecipe.inWeeklyPlan;
+                    updateWeeklyPlanButton(currentRecipe.inWeeklyPlan);
+                } else {
+                    alert('操作失败：' + (result.message || '未知错误'));
+                }
+            } catch (error) {
+                console.error('切换本周计划状态失败:', error);
                 alert('网络错误，请稍后重试');
             } finally {
                 btn.disabled = false;

@@ -374,12 +374,15 @@ body::before {
 .search-box {
     display: flex;
     gap: 10px;
-    max-width: 600px;
+    max-width: 980px;
     margin: 0 auto;
+    flex-wrap: nowrap;
+    align-items: center;
 }
 
 .search-box input {
     flex: 1;
+    min-width: 320px;
     padding: 12px 20px;
     border: 2px solid #e0e0e0;
     border-radius: 25px;
@@ -393,6 +396,7 @@ body::before {
 }
 
 .search-box button {
+    flex: 0 0 auto;
     padding: 12px 30px;
     background: #e74c3c;
     color: white;
@@ -803,7 +807,7 @@ body::before {
     font-weight: 600;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(243, 156, 18, 0.4);
-    margin-left: 15px;
+    white-space: nowrap;
 }
 
 .random-btn:hover {
@@ -813,6 +817,33 @@ body::before {
 }
 
 .random-btn:active {
+    transform: translateY(0);
+}
+
+.weekly-plan-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.35);
+    white-space: nowrap;
+}
+
+.weekly-plan-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(46, 204, 113, 0.45);
+    background: linear-gradient(135deg, #27ae60, #1e8449);
+}
+
+.weekly-plan-btn:active {
     transform: translateY(0);
 }
 
@@ -1361,4 +1392,58 @@ body::before {
 .recommend-toggle-btn.recommended:hover {
     background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
     color: #ff6b6b;
+}
+
+/* 本周计划按钮（复用 recommend-toggle-btn 的结构） */
+.weekly-plan-toggle-btn {
+    border-color: #2ecc71;
+    color: #27ae60;
+    background: linear-gradient(135deg, #fff 0%, #f2fff7 100%);
+    box-shadow: 0 2px 8px rgba(46, 204, 113, 0.2);
+}
+
+.weekly-plan-toggle-btn:hover {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.35);
+}
+
+.weekly-plan-toggle-btn.recommended {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+    color: #fff;
+    border-color: #2ecc71;
+}
+
+.weekly-plan-toggle-btn.recommended:hover {
+    background: linear-gradient(135deg, #fff 0%, #f2fff7 100%);
+    color: #27ae60;
+}
+
+/* 本周计划列表：标题+移除按钮 */
+.weekly-card-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.weekly-card-title h3 {
+    margin: 0;
+}
+
+.weekly-remove-btn {
+    padding: 6px 10px;
+    border-radius: 16px;
+    border: 1px solid #ff6b6b;
+    background: #fff;
+    color: #ff6b6b;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.weekly-remove-btn:hover {
+    background: #ff6b6b;
+    color: #fff;
 }
