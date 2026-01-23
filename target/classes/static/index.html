@@ -21,6 +21,22 @@
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="搜索菜谱，如：红烧肉、宫保鸡丁...">
                 <button onclick="searchRecipes()">搜索</button>
+                <button class="random-btn" onclick="showRandomRecipe()">🎲 今天吃什么</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 随机推荐弹窗 -->
+    <div id="randomModal" class="random-modal" onclick="closeRandomModal(event)">
+        <div class="random-modal-content" onclick="event.stopPropagation()">
+            <h2>🎯 今日推荐</h2>
+            <p class="season-tip" id="seasonTip">冬季推荐 · 暖身暖胃</p>
+            <div class="recipe-preview" id="randomRecipePreview">
+                <!-- 动态填充 -->
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="showRandomRecipe()">🔄 换一个</button>
+                <button class="btn btn-primary" id="viewRandomBtn">👀 查看详情</button>
             </div>
         </div>
     </div>
@@ -29,22 +45,22 @@
     <div class="container">
         <div class="filter-section">
             <div class="filter-tags">
-                <span class="filter-tag active" data-category="">全部</span>
-                <span class="filter-tag" data-category="主食">主食</span>
-                <span class="filter-tag" data-category="炒菜">炒菜</span>
-                <span class="filter-tag" data-category="蒸菜">蒸菜</span>
-                <span class="filter-tag" data-category="炖菜">炖菜</span>
-                <span class="filter-tag" data-category="煮锅">煮锅</span>
-                <span class="filter-tag" data-category="砂锅菜">砂锅菜</span>
-                <span class="filter-tag" data-category="炸品">炸品</span>
-                <span class="filter-tag" data-category="烤类">烤类</span>
-                <span class="filter-tag" data-category="烫菜">烫菜</span>
-                <span class="filter-tag" data-category="凉拌">凉拌</span>
-                <span class="filter-tag" data-category="卤菜">卤菜</span>
-                <span class="filter-tag" data-category="汤类">汤类</span>
-                <span class="filter-tag" data-category="早餐">早餐</span>
-                <span class="filter-tag" data-category="饮品">饮品</span>
-                <span class="filter-tag" data-category="配料">配料</span>
+                <span class="filter-tag active" data-category="">🍽️ 全部</span>
+                <span class="filter-tag" data-category="主食">🍚 主食</span>
+                <span class="filter-tag" data-category="炒菜">🥘 炒菜</span>
+                <span class="filter-tag" data-category="蒸菜">🫕 蒸菜</span>
+                <span class="filter-tag" data-category="炖菜">🍲 炖菜</span>
+                <span class="filter-tag" data-category="煮锅">🫕 煮锅</span>
+                <span class="filter-tag" data-category="砂锅菜">🥣 砂锅菜</span>
+                <span class="filter-tag" data-category="炸品">🍤 炸品</span>
+                <span class="filter-tag" data-category="烤类">🍖 烤类</span>
+                <span class="filter-tag" data-category="烫菜">♨️ 烫菜</span>
+                <span class="filter-tag" data-category="凉拌">🥗 凉拌</span>
+                <span class="filter-tag" data-category="卤菜">🍗 卤菜</span>
+                <span class="filter-tag" data-category="汤类">🍜 汤类</span>
+                <span class="filter-tag" data-category="早餐">🥐 早餐</span>
+                <span class="filter-tag" data-category="饮品">🧋 饮品</span>
+                <span class="filter-tag" data-category="配料">🧄 配料</span>
             </div>
         </div>
     </div>
@@ -75,6 +91,19 @@
             <button id="nextBtn" onclick="changePage(1)">下一页</button>
         </div>
     </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="footer-decor">
+            <span>🥢</span>
+            <span>🍜</span>
+            <span>🥟</span>
+            <span>🍲</span>
+            <span>🥡</span>
+        </div>
+        <p>小福贵儿 · 用心烹饪每一道菜</p>
+        <p class="footer-sub">探索中华美食的无限魅力</p>
+    </footer>
 
     <script src="js/app.js"></script>
 </body>

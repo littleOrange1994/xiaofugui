@@ -54,4 +54,27 @@ public class RecipeService {
         Page<Recipe> result = recipeMapper.selectPage(pageParam, wrapper);
         return new PageResult<>(result.getTotal(), result.getRecords());
     }
+
+    /**
+     * 添加菜品
+     */
+    public Long addRecipe(Recipe recipe) {
+        recipe.setId(null);
+        recipeMapper.insert(recipe);
+        return recipe.getId();
+    }
+
+    /**
+     * 修改菜品
+     */
+    public boolean updateRecipe(Recipe recipe) {
+        if (recipe.getId() == null) {
+            return false;
+        }
+        Recipe existing = recipeMapper.selectById(recipe.getId());
+        if (existing == null) {
+            return false;
+        }
+        return recipeMapper.updateById(recipe) > 0;
+    }
 }

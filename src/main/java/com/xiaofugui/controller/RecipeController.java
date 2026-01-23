@@ -54,4 +54,28 @@ public class RecipeController {
         PageResult<Recipe> result = recipeService.searchRecipes(keyword, page, pageSize);
         return Result.success(result);
     }
+
+    /**
+     * 添加菜品
+     */
+    @PostMapping
+    public Result<Long> addRecipe(@RequestBody Recipe recipe) {
+        Long id = recipeService.addRecipe(recipe);
+        return Result.success(id);
+    }
+
+    /**
+     * 修改菜品
+     */
+    @PostMapping("/update")
+    public Result<Void> updateRecipe(@RequestBody Recipe recipe) {
+        if (recipe.getId() == null) {
+            return Result.error("菜品ID不能为空");
+        }
+        boolean success = recipeService.updateRecipe(recipe);
+        if (!success) {
+            return Result.error("菜品不存在或更新失败");
+        }
+        return Result.success();
+    }
 }

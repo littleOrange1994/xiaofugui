@@ -26,3 +26,4 @@ mybatis-plus:
 recipe:
   import:
     enabled: false
+#    enabled: true

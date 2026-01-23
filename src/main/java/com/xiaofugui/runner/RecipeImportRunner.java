@@ -206,6 +206,8 @@ public class RecipeImportRunner implements CommandLineRunner {
             if (line.startsWith("- ") || line.startsWith("* ")) {
                 String item = line.substring(2).trim();
                 item = item.replaceFirst("^\\d+[.、．]\\s*", "");
+                // 移除 markdown 链接格式 [文本](链接) -> 文本
+                item = item.replaceAll("\\[([^]]+)]\\([^)]+\\)", "$1");
 
                 if ("ingredients".equals(currentSection) && StrUtil.isNotBlank(item)) {
                     ingredients.add(item);

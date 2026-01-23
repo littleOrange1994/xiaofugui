@@ -210,18 +210,22 @@ function getDifficultyText(level) {
 
 // 获取辣度显示
 function getSpicyLevel(level) {
-    if (!level || level === 0) return '不辣';
-    return '🌶️'.repeat(Math.min(level, 5));
+    if (!level || level === 0) {
+        return '<span class="spicy-none">🌶️ 不辣</span>';
+    }
+    const peppers = '🌶️'.repeat(Math.min(level, 5));
+    const levelText = ['', '微辣', '中辣', '较辣', '重辣', '变态辣'][Math.min(level, 5)];
+    return `<span class="spicy-hot">${peppers} ${levelText}</span>`;
 }
 
 // 获取推荐星级
 function getRecommendScore(score) {
-    if (!score) return '';
-    const fullStars = Math.floor(score / 2);
-    const halfStar = score % 2 >= 1;
-    let stars = '⭐'.repeat(fullStars);
-    if (halfStar) stars += '✨';
-    return stars;
+    if (!score) return '<span class="stars">☆☆☆☆☆</span>';
+    // score 范围 1-10，转换为 1-5 星
+    const rating = Math.min(5, Math.max(1, Math.round(score / 2)));
+    const fullStars = '★'.repeat(rating);
+    const emptyStars = '☆'.repeat(5 - rating);
+    return `<span class="stars">${fullStars}${emptyStars}</span> <span class="score-num">${score}/10</span>`;
 }
 
 // HTML 转义
@@ -230,4 +234,74 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// ========== 今天吃什么功能 ==========
+
+// 获取当前季节
+function getCurrentSeason() {
+    const month = new Date().getMonth() + 1;
+    if (month >= 3 && month <= 5) return { name: '春季', tip: '春季养生 · 清淡为主', categories: ['蒸菜', '汤类', '凉拌'] };
+    if (month >= 6 && month <= 8) return { name: '夏季', tip: '夏季消暑 · 清凉解腻', categories: ['凉拌', '饮品', '汤类'] };
+    if (month >= 9 && month <= 11) return { name: '秋季', tip: '秋季进补 · 润燥滋养', categories: ['炖菜', '汤类', '蒸菜'] };
+    return { name: '冬季', tip: '冬季暖身 · 滋补养生', categories: ['炖菜', '砂锅菜', '煮锅', '汤类'] };
+}
+
+// 显示随机菜谱
+async function showRandomRecipe() {
+    const modal = document.getElementById('randomModal');
+    const preview = document.getElementById('randomRecipePreview');
+    const seasonTip = document.getElementById('seasonTip');
+    const viewBtn = document.getElementById('viewRandomBtn');
+
+    // 显示加载状态
+    preview.innerHTML = '<div style="padding: 40px; color: #999;">🎲 正在为您挑选...</div>';
+    modal.classList.add('show');
+
+    // 设置季节提示
+    const season = getCurrentSeason();
+    seasonTip.textContent = `${season.name}推荐 · ${season.tip}`;
+
+    try {
+        // 随机选择一个适合季节的分类
+        const category = season.categories[Math.floor(Math.random() * season.categories.length)];
+
+        // 获取该分类的菜谱
+        const response = await fetch(`${API_BASE}?page=1&pageSize=50&category=${encodeURIComponent(category)}`);
+        const result = await response.json();
+
+        if (result.code === 0 && result.data && result.data.records.length > 0) {
+            const recipes = result.data.records;
+            const randomRecipe = recipes[Math.floor(Math.random() * recipes.length)];
+
+            // 渲染推荐菜品
+            preview.innerHTML = `
+                ${randomRecipe.imageUrl
+                    ? `<img src="${randomRecipe.imageUrl}" alt="${randomRecipe.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22>🍲</text></svg>'">`
+                    : '<div style="width:150px;height:150px;background:#fff5f5;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:4rem;margin:0 auto 15px;">🍲</div>'
+                }
+                <h3>${escapeHtml(randomRecipe.name)}</h3>
+                <p style="color:#888;margin-top:10px;">
+                    ${randomRecipe.category || ''} · ${getDifficultyText(randomRecipe.difficulty)} · ${getSpicyLevel(randomRecipe.spicyLevel)}
+                </p>
+            `;
+
+            // 设置查看详情按钮
+            viewBtn.onclick = () => {
+                window.location.href = `detail.html?id=${randomRecipe.id}`;
+            };
+        } else {
+            preview.innerHTML = '<div style="padding: 40px; color: #999;">暂无推荐，请稍后再试</div>';
+        }
+    } catch (error) {
+        console.error('获取随机菜谱失败:', error);
+        preview.innerHTML = '<div style="padding: 40px; color: #999;">获取推荐失败，请稍后再试</div>';
+    }
+}
+
+// 关闭随机推荐弹窗
+function closeRandomModal(event) {
+    if (event.target.id === 'randomModal') {
+        document.getElementById('randomModal').classList.remove('show');
+    }
 }
