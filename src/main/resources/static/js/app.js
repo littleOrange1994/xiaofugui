@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', function() {
     initSearchInput();
     loadRecipes();
     loadWeeklyPlanCount();
+
+    // 优化性能：滚动时暂停飘浮动画
+    optimizeFloatingAnimation();
 });
 
 /**
@@ -180,7 +183,7 @@ function renderRecipes() {
         <div class="recipe-card" onclick="viewRecipe(${recipe.id})">
             <div class="card-image-wrapper">
                 ${recipe.imageUrl
-                    ? `<img src="${recipe.imageUrl}" alt="${recipe.name}" onerror="this.outerHTML='<div class=\\'placeholder-img\\'>🍲</div>'">`
+                    ? `<img src="${recipe.imageUrl}" alt="${recipe.name}" loading="lazy" onerror="this.outerHTML='<div class=\\'placeholder-img\\'>🍲</div>'">`
                     : '<div class="placeholder-img">🍲</div>'
                 }
                 <div class="card-overlay">
@@ -371,7 +374,7 @@ async function showRandomRecipe() {
             // 渲染推荐菜品
             preview.innerHTML = `
                 ${randomRecipe.imageUrl
-                    ? `<img src="${randomRecipe.imageUrl}" alt="${randomRecipe.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22>🍲</text></svg>'">`
+                    ? `<img src="${randomRecipe.imageUrl}" alt="${randomRecipe.name}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22>🍲</text></svg>'">`
                     : '<div style="width:150px;height:150px;background:#fff5f5;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:4rem;margin:0 auto 15px;">🍲</div>'
                 }
                 <h3>${escapeHtml(randomRecipe.name)}</h3>
@@ -429,4 +432,36 @@ function showRecommendCategory() {
     setTimeout(() => {
         document.getElementById('recipeGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
+}
+
+/**
+ * 优化飘浮动画性能
+ * 用户滚动时暂停动画，停止滚动后恢复
+ */
+function optimizeFloatingAnimation() {
+    const floatingBg = document.querySelector('.floating-food-bg');
+    if (!floatingBg) return;
+
+    let scrollTimer = null;
+
+    window.addEventListener('scroll', function() {
+        // 滚动时暂停动画
+        floatingBg.style.animationPlayState = 'paused';
+        floatingBg.querySelectorAll('.food-item').forEach(item => {
+            item.style.animationPlayState = 'paused';
+        });
+
+        // 清除之前的定时器
+        if (scrollTimer) {
+            clearTimeout(scrollTimer);
+        }
+
+        // 停止滚动300ms后恢复动画
+        scrollTimer = setTimeout(function() {
+            floatingBg.style.animationPlayState = 'running';
+            floatingBg.querySelectorAll('.food-item').forEach(item => {
+                item.style.animationPlayState = 'running';
+            });
+        }, 300);
+    }, { passive: true });
 }

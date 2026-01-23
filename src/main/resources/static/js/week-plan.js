@@ -14,6 +14,8 @@ let pendingRequests = [];
 
 document.addEventListener('DOMContentLoaded', function() {
     loadWeeklyPlan();
+    // 优化性能：滚动时暂停飘浮动画
+    optimizeFloatingAnimation();
 });
 
 async function loadWeeklyPlan() {
@@ -283,7 +285,7 @@ function renderItemCard(item) {
         <div class="recipe-card" onclick="viewRecipe(${recipe.id})">
             <div class="card-image-wrapper">
                 ${recipe.imageUrl
-                    ? `<img src="${recipe.imageUrl}" alt="${escapeHtml(recipe.name)}" onerror="this.outerHTML='<div class=\\'placeholder-img\\'>🍲</div>'">`
+                    ? `<img src="${recipe.imageUrl}" alt="${escapeHtml(recipe.name)}" loading="lazy" onerror="this.outerHTML='<div class=\\'placeholder-img\\'>🍲</div>'">`
                     : '<div class="placeholder-img">🍲</div>'
                 }
                 <div class="card-overlay">
@@ -367,4 +369,36 @@ function goBackHome() {
 
     // 4. 使用replace避免在历史记录中留痕，提升后退性能
     window.location.replace('index.html');
+}
+
+/**
+ * 优化飘浮动画性能
+ * 用户滚动时暂停动画，停止滚动后恢复
+ */
+function optimizeFloatingAnimation() {
+    const floatingBg = document.querySelector('.floating-food-bg');
+    if (!floatingBg) return;
+
+    let scrollTimer = null;
+
+    window.addEventListener('scroll', function() {
+        // 滚动时暂停动画
+        floatingBg.style.animationPlayState = 'paused';
+        floatingBg.querySelectorAll('.food-item').forEach(item => {
+            item.style.animationPlayState = 'paused';
+        });
+
+        // 清除之前的定时器
+        if (scrollTimer) {
+            clearTimeout(scrollTimer);
+        }
+
+        // 停止滚动300ms后恢复动画
+        scrollTimer = setTimeout(function() {
+            floatingBg.style.animationPlayState = 'running';
+            floatingBg.querySelectorAll('.food-item').forEach(item => {
+                item.style.animationPlayState = 'running';
+            });
+        }, 300);
+    }, { passive: true });
 }
