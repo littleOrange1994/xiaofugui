@@ -2,6 +2,7 @@ package com.xiaofugui.controller;
 
 import com.xiaofugui.dto.ChatRequest;
 import com.xiaofugui.dto.Result;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
@@ -34,6 +35,7 @@ import reactor.core.publisher.Flux;
  * @see ChatClient
  * @see MessageChatMemoryAdvisor
  */
+@Slf4j
 @RestController
 @RequestMapping("/api")
 @CrossOrigin(origins = "*")
@@ -148,18 +150,27 @@ public class ChatController {
      */
     @PostMapping(value = "/chatStream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> chatStream(@RequestBody ChatRequest request) {
+        log.info("chatStream 请求 - message: {}", request.getMessage());
+        StringBuilder fullContent = new StringBuilder();
+
+        Flux<String> responseFlux;
         if (request.getSystemPrompt() != null && !request.getSystemPrompt().isEmpty()) {
-            return chatClient.prompt()
+            responseFlux = chatClient.prompt()
                     .system(request.getSystemPrompt())
                     .user(request.getMessage())
                     .stream()
                     .content();
         } else {
-            return chatClient.prompt()
+            responseFlux = chatClient.prompt()
                     .user(request.getMessage())
                     .stream()
                     .content();
         }
+
+        return responseFlux
+                .doOnNext(fullContent::append)
+                .map(content -> content.replace("\n", "[BR]"))
+                .doOnComplete(() -> log.info("chatStream 完整响应:\n{}", fullContent.toString()));
     }
 
     /**

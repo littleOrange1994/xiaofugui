@@ -612,8 +612,8 @@ function showAiSearch(keyword) {
         fullContent += event.data;
         currentAiSearchContent = fullContent;
 
-        // 实时渲染 Markdown
-        contentEl.innerHTML = `<div class="ai-search-result">${renderMarkdown(fullContent)}<span class="ai-cursor">▌</span></div>`;
+        // 实时渲染
+        contentEl.innerHTML = `<div class="ai-search-result">${formatSseContent(fullContent)}<span class="ai-cursor">▌</span></div>`;
 
         // 滚动到底部
         contentEl.scrollTop = contentEl.scrollHeight;
@@ -625,7 +625,7 @@ function showAiSearch(keyword) {
 
         if (fullContent) {
             // 已有内容，移除光标
-            contentEl.innerHTML = `<div class="ai-search-result">${renderMarkdown(fullContent)}</div>`;
+            contentEl.innerHTML = `<div class="ai-search-result">${formatSseContent(fullContent)}</div>`;
         } else {
             // 没有内容，显示错误
             contentEl.innerHTML = `<div class="ai-search-error">获取烹饪说明失败，请稍后重试</div>`;
@@ -674,9 +674,9 @@ async function copyAiSearchContent() {
 }
 
 /**
- * 简单的 Markdown 渲染（支持标题、列表、加粗、分隔线）
+ * 格式化 SSE 返回的内容（统一处理 [BR] 换行标记）
  */
-function renderMarkdown(text) {
+function formatSseContent(text) {
     if (!text) return '';
 
     return text
@@ -684,20 +684,6 @@ function renderMarkdown(text) {
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
-        // 加粗（优先处理，支持跨行）
-        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-        // 标题
-        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-        // 分隔线
-        .replace(/^---$/gm, '<hr>')
-        // 无序列表
-        .replace(/^- (.+)$/gm, '<li>$1</li>')
-        .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
-        // 有序列表
-        .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
-        // 段落
-        .replace(/\n\n/g, '</p><p>')
-        .replace(/\n/g, '<br>');
+        // [BR] 转换为 <br>
+        .replace(/\[BR\]/g, '<br>');
 }

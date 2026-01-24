@@ -306,6 +306,9 @@ public class AiRecommendService {
             return Flux.just("请输入要搜索的菜品名称");
         }
 
+        log.info("aiSearchStream 请求 - keyword: {}", keyword);
+        StringBuilder fullContent = new StringBuilder();
+
         try {
             String prompt = String.format(AI_SEARCH_PROMPT, keyword);
             ChatClient chatClient = chatClientBuilder.build();
@@ -314,7 +317,9 @@ public class AiRecommendService {
                     .user(prompt)
                     .stream()
                     .content()
-                    .doOnComplete(() -> log.info("AI 搜索流式响应完成, 关键词: {}", keyword))
+                    .doOnNext(fullContent::append)
+                    .map(content -> content.replace("\n", "[BR]"))
+                    .doOnComplete(() -> log.info("aiSearchStream 完整响应:\n{}", fullContent.toString()))
                     .onErrorResume(e -> {
                         log.error("AI 搜索失败, 关键词: {}", keyword, e);
                         return Flux.just("AI 搜索失败，请稍后重试");

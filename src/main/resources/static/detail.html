@@ -78,11 +78,17 @@
             </div>
 
             <!-- AI 回复区域 -->
-            <div id="aiResponseSection" class="detail-section ai-response-section" style="display: none;">
-                <div class="ai-section-header">
-                    <h2>🤖 AI 说</h2>
-                    <button class="ai-copy-btn" id="aiCopyBtn" onclick="copyAiResponse()" title="复制内容">📋 复制</button>
+            <div id="aiResponseSection" class="ai-response-section" style="display: none;">
+                <div class="ai-response-header">
+                    <span class="ai-response-title">🤖 AI 烹饪助手</span>
+                    <div class="ai-response-header-actions">
+                        <button class="ai-response-copy-btn" id="aiCopyBtn" onclick="copyAiResponse()">📋 复制</button>
+                    </div>
                 </div>
+                <div class="ai-response-decor">
+                    <span>🍳</span><span>🥢</span><span>🔪</span><span>🧂</span><span>🍲</span>
+                </div>
+                <div class="ai-response-keyword" id="aiResponseKeyword"></div>
                 <div id="aiResponseContent" class="ai-response-content">
                     <!-- AI 回复内容动态生成 -->
                 </div>
@@ -508,15 +514,17 @@
             const text = document.getElementById('aiBtnText');
             const responseSection = document.getElementById('aiResponseSection');
             const responseContent = document.getElementById('aiResponseContent');
+            const responseKeyword = document.getElementById('aiResponseKeyword');
 
             // 禁用按钮，显示加载状态
             btn.disabled = true;
             icon.textContent = '⏳';
             text.textContent = '思考中...';
 
-            // 显示回复区域，清空内容
+            // 显示回复区域，设置标题，清空内容
             responseSection.style.display = 'block';
-            responseContent.innerHTML = '<span class="ai-cursor">|</span>';
+            responseKeyword.textContent = `「${currentRecipe.name}」的烹饪说明`;
+            responseContent.innerHTML = '<div class="ai-loading-hint">AI 正在思考中...</div>';
 
             const systemPrompt = '你是一个幽默风趣的专业厨师，精通各种菜品的做法。回复要求：1.不要使用Markdown格式（不要用#、**、-、•等符号）；2.步骤用"第一步"、"第二步"表述，每一步必须单独一行，步骤之间要换行；3.食材清单每种食材单独一行；4.语言风格轻松幽默，可以加入俏皮话；5.做法必须详细完整，食材用量准确，步骤不能省略，火候时间要具体。';
             const userMessage = `请介绍一下"${currentRecipe.name}"这道菜`;
@@ -538,29 +546,40 @@
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 let fullContent = '';
+                let buffer = '';
 
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
 
-                    const chunk = decoder.decode(value, { stream: true });
-                    // 解析 SSE 数据
-                    const lines = chunk.split('\n');
-                    for (const line of lines) {
+                    buffer += decoder.decode(value, { stream: true });
+
+                    // 逐行处理
+                    let newlineIndex;
+                    while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
+                        const line = buffer.substring(0, newlineIndex);
+                        buffer = buffer.substring(newlineIndex + 1);
+
                         if (line.startsWith('data:')) {
-                            const data = line.substring(5);
-                            if (data) {
-                                fullContent += data;
-                            }
+                            fullContent += line.substring(5);
                         }
                     }
-                    // 实时更新页面，使用 Markdown 解析
-                    responseContent.innerHTML = formatAIResponse(fullContent) + '<span class="ai-cursor">|</span>';
+
+                    // 实时更新页面
+                    responseContent.innerHTML = formatSseContent(fullContent) + '<span class="ai-cursor">|</span>';
                     currentAiResponseContent = fullContent;
+
+                    // 自动滚动到底部
+                    responseContent.scrollTop = responseContent.scrollHeight;
+                }
+
+                // 处理缓存中剩余的数据
+                if (buffer.startsWith('data:')) {
+                    fullContent += buffer.substring(5);
                 }
 
                 // 完成后移除光标
-                responseContent.innerHTML = formatAIResponse(fullContent);
+                responseContent.innerHTML = formatSseContent(fullContent);
                 currentAiResponseContent = fullContent;
 
             } catch (error) {
@@ -575,13 +594,15 @@
         }
 
         /**
-         * 格式化 AI 回复内容
-         * 将换行符转换为 HTML 换行
+         * 格式化 SSE 返回的内容（统一处理 [BR] 换行标记）
          */
-        function formatAIResponse(text) {
+        function formatSseContent(text) {
             if (!text) return '';
-            // 将换行符转换为 <br> 标签
-            return text.replace(/\n/g, '<br>');
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/\[BR\]/g, '<br>');
         }
 
         // 当前 AI 回复的原始内容（用于复制）
