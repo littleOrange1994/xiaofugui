@@ -173,13 +173,6 @@
                     if (autoAI) {
                         setTimeout(() => {
                             askAI();
-                            // 滚动到 AI 按钮位置，让用户能看到按钮和 AI 输出
-                            setTimeout(() => {
-                                const aiBtn = document.getElementById('aiBtn');
-                                if (aiBtn) {
-                                    aiBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                }
-                            }, 30);
                         }, 300);
                     }
                 } else {
@@ -525,6 +518,7 @@
             responseSection.style.display = 'block';
             responseKeyword.textContent = `「${currentRecipe.name}」的烹饪说明`;
             responseContent.innerHTML = '<div class="ai-loading-hint">AI 正在思考中...</div>';
+            scrollAiResponseIntoView();
 
             const systemPrompt = '你是一个幽默风趣的专业厨师，精通各种菜品的做法。回复要求：1.不要使用Markdown格式（不要用#、**、-、•等符号）；2.步骤用"第一步"、"第二步"表述，每一步必须单独一行，步骤之间要换行；3.食材清单每种食材单独一行；4.语言风格轻松幽默，可以加入俏皮话；5.做法必须详细完整，食材用量准确，步骤不能省略，火候时间要具体。';
             const userMessage = `请介绍一下"${currentRecipe.name}"这道菜`;
@@ -568,9 +562,7 @@
                     // 实时更新页面
                     responseContent.innerHTML = formatSseContent(fullContent) + '<span class="ai-cursor">|</span>';
                     currentAiResponseContent = fullContent;
-
-                    // 自动滚动到底部
-                    responseContent.scrollTop = responseContent.scrollHeight;
+                    scrollAiResponseToBottom();
                 }
 
                 // 处理缓存中剩余的数据
@@ -581,6 +573,7 @@
                 // 完成后移除光标
                 responseContent.innerHTML = formatSseContent(fullContent);
                 currentAiResponseContent = fullContent;
+                scrollAiResponseToBottom();
 
             } catch (error) {
                 console.error('AI 请求失败:', error);
@@ -591,6 +584,30 @@
                 icon.textContent = '🤖';
                 text.textContent = 'AI一下';
             }
+        }
+
+        /**
+         * 将 AI 回复区域滚动到视口垂直居中
+         */
+        function scrollAiResponseIntoView() {
+            const responseSection = document.getElementById('aiResponseSection');
+            if (!responseSection) return;
+
+            requestAnimationFrame(() => {
+                responseSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        }
+
+        /**
+         * 将 AI 回复区域底部滚动到视口内
+         */
+        function scrollAiResponseToBottom() {
+            const responseSection = document.getElementById('aiResponseSection');
+            if (!responseSection) return;
+
+            requestAnimationFrame(() => {
+                responseSection.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            });
         }
 
         /**

@@ -1881,8 +1881,6 @@ body::before {
     color: #333;
     font-size: 15px;
     min-height: 100px;
-    max-height: 60vh;
-    overflow-y: auto;
 }
 
 .ai-loading-hint {
