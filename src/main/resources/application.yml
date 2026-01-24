@@ -4,6 +4,14 @@ server:
 spring:
   application:
     name: xiaofugui
+  ai:
+    openai:
+      api-key: sk-93a14d795a4f4ace9b02457e329a9cd8
+      base-url: https://api.deepseek.com
+      chat:
+        options:
+          model: deepseek-chat
+          temperature: 0.7
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://115.191.20.121:3306/xiaofugui?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
