@@ -684,12 +684,12 @@ function renderMarkdown(text) {
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
+        // 加粗（优先处理，支持跨行）
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
         // 标题
         .replace(/^### (.+)$/gm, '<h3>$1</h3>')
         .replace(/^## (.+)$/gm, '<h2>$1</h2>')
         .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-        // 加粗
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
         // 分隔线
         .replace(/^---$/gm, '<hr>')
         // 无序列表
@@ -699,12 +699,5 @@ function renderMarkdown(text) {
         .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
         // 段落
         .replace(/\n\n/g, '</p><p>')
-        .replace(/\n/g, '<br>')
-        // 包裹段落
-        .replace(/^(.+)$/gm, function(match) {
-            if (match.startsWith('<h') || match.startsWith('<ul') || match.startsWith('<ol') || match.startsWith('<hr') || match.startsWith('<li')) {
-                return match;
-            }
-            return match;
-        });
+        .replace(/\n/g, '<br>');
 }

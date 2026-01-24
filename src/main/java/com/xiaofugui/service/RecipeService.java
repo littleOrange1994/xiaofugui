@@ -106,7 +106,7 @@ public class RecipeService {
      */
     public List<Recipe> getAllRecipeSummaries() {
         QueryWrapper<Recipe> wrapper = new QueryWrapper<>();
-        wrapper.select("id", "name", "category", "cuisine_type", "spicy_level", "season_tags");
+        wrapper.select("id", "name", "category", "spicy_level", "season_tags");
         return recipeMapper.selectList(wrapper);
     }
 }

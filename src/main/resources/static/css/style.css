@@ -1899,7 +1899,6 @@ body::before {
 }
 
 .ai-response-content strong {
-    color: #8b0000;
     font-weight: 600;
 }
 
@@ -2140,7 +2139,7 @@ body::before {
 }
 
 .ai-search-result strong {
-    color: #8b0000;
+    font-weight: 600;
 }
 
 .ai-search-result hr {

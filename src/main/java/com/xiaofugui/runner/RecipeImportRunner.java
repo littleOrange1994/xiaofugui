@@ -173,7 +173,6 @@ public class RecipeImportRunner implements CommandLineRunner {
         }
         recipe.setName(name);
         recipe.setCategory(category);
-        recipe.setCuisineType("OTHER");
         recipe.setSourceFile(resource.getFilename());
 
         // 解析图片

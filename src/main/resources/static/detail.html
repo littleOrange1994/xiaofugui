@@ -207,11 +207,8 @@
 
             // 标签
             const metaHtml = [];
-            if (recipe.cuisineType) {
-                metaHtml.push(`<span class="meta-tag cuisine">${escapeHtml(recipe.cuisineType)}</span>`);
-            }
             if (recipe.category) {
-                metaHtml.push(`<span class="meta-tag">${escapeHtml(recipe.category)}</span>`);
+                metaHtml.push(`<span class="meta-tag cuisine">${escapeHtml(recipe.category)}</span>`);
             }
             if (recipe.seasonTags) {
                 recipe.seasonTags.split(/[,，]/).forEach(tag => {
@@ -521,7 +518,7 @@
             responseSection.style.display = 'block';
             responseContent.innerHTML = '<span class="ai-cursor">|</span>';
 
-            const systemPrompt = '你是一个厨师，精通各种菜品的做法';
+            const systemPrompt = '你是一个幽默风趣的专业厨师，精通各种菜品的做法。回复要求：1.不要使用Markdown格式（不要用#、**、-、•等符号）；2.步骤用"第一步"、"第二步"表述，每一步必须单独一行，步骤之间要换行；3.食材清单每种食材单独一行；4.语言风格轻松幽默，可以加入俏皮话；5.做法必须详细完整，食材用量准确，步骤不能省略，火候时间要具体。';
             const userMessage = `请介绍一下"${currentRecipe.name}"这道菜`;
 
             try {
@@ -579,26 +576,12 @@
 
         /**
          * 格式化 AI 回复内容
-         * 使用 marked 库解析 Markdown 格式
+         * 将换行符转换为 HTML 换行
          */
         function formatAIResponse(text) {
             if (!text) return '';
-            // 预处理：修复常见的 Markdown 格式问题
-            let processed = text;
-            // 处理 --- 分隔线（前后加换行）
-            processed = processed.replace(/---+/g, '\n\n---\n\n');
-            // 处理 ### 标题（前面加换行）
-            processed = processed.replace(/(#{1,3})\s*/g, '\n\n$1 ');
-            // 处理序号列表（1. 2. 3. 前面加换行）
-            processed = processed.replace(/(\d+)\.\s*/g, '\n$1. ');
-            // 处理 - 列表项（前面加换行，注意避免影响 ---）
-            processed = processed.replace(/([^\n-])-\s+/g, '$1\n- ');
-            // 清理多余的连续换行（最多保留2个）
-            processed = processed.replace(/\n{3,}/g, '\n\n');
-            // 去掉开头的换行
-            processed = processed.replace(/^\n+/, '');
-            // 使用 marked 解析 Markdown
-            return marked.parse(processed);
+            // 将换行符转换为 <br> 标签
+            return text.replace(/\n/g, '<br>');
         }
 
         // 当前 AI 回复的原始内容（用于复制）
