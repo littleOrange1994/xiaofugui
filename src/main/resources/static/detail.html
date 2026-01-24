@@ -79,7 +79,10 @@
 
             <!-- AI 回复区域 -->
             <div id="aiResponseSection" class="detail-section ai-response-section" style="display: none;">
-                <h2>🤖 AI 说</h2>
+                <div class="ai-section-header">
+                    <h2>🤖 AI 说</h2>
+                    <button class="ai-copy-btn" id="aiCopyBtn" onclick="copyAiResponse()" title="复制内容">📋 复制</button>
+                </div>
                 <div id="aiResponseContent" class="ai-response-content">
                     <!-- AI 回复内容动态生成 -->
                 </div>
@@ -556,10 +559,12 @@
                     }
                     // 实时更新页面，使用 Markdown 解析
                     responseContent.innerHTML = formatAIResponse(fullContent) + '<span class="ai-cursor">|</span>';
+                    currentAiResponseContent = fullContent;
                 }
 
                 // 完成后移除光标
                 responseContent.innerHTML = formatAIResponse(fullContent);
+                currentAiResponseContent = fullContent;
 
             } catch (error) {
                 console.error('AI 请求失败:', error);
@@ -594,6 +599,31 @@
             processed = processed.replace(/^\n+/, '');
             // 使用 marked 解析 Markdown
             return marked.parse(processed);
+        }
+
+        // 当前 AI 回复的原始内容（用于复制）
+        let currentAiResponseContent = '';
+
+        /**
+         * 复制 AI 回复内容
+         */
+        async function copyAiResponse() {
+            if (!currentAiResponseContent) {
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(currentAiResponseContent);
+                const btn = document.getElementById('aiCopyBtn');
+                btn.textContent = '✅ 已复制';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = '📋 复制';
+                    btn.classList.remove('copied');
+                }, 2000);
+            } catch (err) {
+                console.error('复制失败:', err);
+            }
         }
     </script>
 </body>

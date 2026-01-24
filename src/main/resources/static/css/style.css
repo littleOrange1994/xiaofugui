@@ -996,7 +996,7 @@ body::before {
     padding: 8px 16px;
     font-size: 14px;
     font-weight: 600;
-    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+    background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
     color: white;
     border: none;
     border-radius: 16px;
@@ -1007,7 +1007,7 @@ body::before {
 
 .card-ai-btn:hover {
     transform: scale(1.05);
-    box-shadow: 0 2px 8px rgba(155, 89, 182, 0.4);
+    box-shadow: 0 2px 8px rgba(196, 30, 58, 0.4);
 }
 
 .recipe-card-meta {
@@ -1123,6 +1123,59 @@ body::before {
 .empty-state .icon {
     font-size: 4rem;
     margin-bottom: 20px;
+}
+
+/* 空状态厨房装饰 */
+.empty-kitchen {
+    margin-bottom: 25px;
+}
+
+.kitchen-shelf {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    padding: 15px 30px;
+    background: linear-gradient(180deg, #f5e6d3 0%, #e8d4c0 100%);
+    border-radius: 8px;
+    display: inline-flex;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.kitchen-shelf span {
+    animation: shelfBounce 2s ease-in-out infinite;
+}
+
+.kitchen-shelf span:nth-child(1) { animation-delay: 0s; }
+.kitchen-shelf span:nth-child(2) { animation-delay: 0.3s; }
+.kitchen-shelf span:nth-child(3) { animation-delay: 0.6s; }
+
+@keyframes shelfBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.empty-pot {
+    font-size: 4rem;
+    position: relative;
+    display: inline-block;
+}
+
+.steam {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    color: #ccc;
+    animation: steamRise 1.5s ease-in-out infinite;
+    letter-spacing: 3px;
+}
+
+@keyframes steamRise {
+    0%, 100% { opacity: 0.3; transform: translateX(-50%) translateY(0); }
+    50% { opacity: 0.8; transform: translateX(-50%) translateY(-10px); }
 }
 
 /* 详情页样式 */
@@ -1301,12 +1354,27 @@ body::before {
         font-size: 1.8rem;
     }
 
+    .header h1::before,
+    .header h1::after {
+        font-size: 0.9rem;
+        margin: 0 8px;
+    }
+
     .search-section {
         margin: -20px 10px 20px;
     }
 
     .search-box {
         flex-direction: column;
+    }
+
+    .search-box input {
+        min-width: auto;
+        width: 100%;
+    }
+
+    .search-box button {
+        width: 100%;
     }
 
     .recipe-grid {
@@ -1326,9 +1394,59 @@ body::before {
     .detail-image .placeholder-img {
         height: 250px;
     }
+
+    /* 小曾推荐按钮移动端适配 */
+    .special-recommend-btn {
+        padding: 14px 30px;
+        font-size: 1.1rem;
+    }
+
+    .recommend-icon {
+        font-size: 1.5rem;
+    }
+
+    /* 飘浮装饰移动端隐藏部分 */
+    .floating-food-bg .food-item:nth-child(n+11) {
+        display: none;
+    }
+
+    .floating-food-bg .food-item {
+        font-size: 2rem;
+        opacity: 0.1;
+    }
+
+    /* 随机推荐弹窗移动端 */
+    .random-modal-content {
+        width: 95%;
+        padding: 20px;
+    }
+
+    .random-modal .btn-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .random-modal .btn {
+        width: 100%;
+    }
+
+    /* AI 推荐理由卡片移动端 */
+    .ai-reason-card {
+        min-height: 80px;
+        max-height: 120px;
+    }
 }
 
 @media (max-width: 480px) {
+    .header h1 {
+        font-size: 1.5rem;
+        letter-spacing: 2px;
+    }
+
+    .header p {
+        font-size: 0.95rem;
+    }
+
     .filter-tags {
         justify-content: flex-start;
         overflow-x: auto;
@@ -1338,10 +1456,68 @@ body::before {
 
     .filter-tag {
         flex-shrink: 0;
+        padding: 8px 15px;
+        font-size: 13px;
     }
 
     .recipe-grid {
         grid-template-columns: 1fr;
+    }
+
+    /* 卡片标题和AI按钮 */
+    .recipe-card-title {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .recipe-card-title h3 {
+        white-space: normal;
+    }
+
+    .card-ai-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* 小曾推荐按钮 */
+    .special-recommend-btn {
+        padding: 12px 25px;
+        font-size: 1rem;
+        gap: 8px;
+    }
+
+    .recommend-badge {
+        top: -8px;
+        right: -8px;
+        font-size: 0.65rem;
+        padding: 3px 8px;
+    }
+
+    .recommend-desc {
+        font-size: 0.85rem;
+    }
+
+    /* 飘浮装饰移动端进一步简化 */
+    .floating-food-bg .food-item:nth-child(n+6) {
+        display: none;
+    }
+
+    /* 空状态厨房装饰 */
+    .kitchen-shelf {
+        font-size: 2rem;
+        padding: 12px 20px;
+        gap: 15px;
+    }
+
+    .empty-pot {
+        font-size: 3rem;
+    }
+
+    /* 页脚装饰 */
+    .footer-decor {
+        font-size: 1.5rem;
+        gap: 20px;
     }
 }
 
@@ -1615,28 +1791,61 @@ body::before {
 
 /* ========== AI 一下按钮样式 ========== */
 .ai-btn {
-    border-color: #9b59b6;
-    color: #8e44ad;
-    background: linear-gradient(135deg, #fff 0%, #f9f0ff 100%);
-    box-shadow: 0 2px 8px rgba(155, 89, 182, 0.2);
+    border-color: #c41e3a;
+    color: #c41e3a;
+    background: linear-gradient(135deg, #fff 0%, #fff5f0 100%);
+    box-shadow: 0 2px 8px rgba(196, 30, 58, 0.2);
 }
 
 .ai-btn:hover {
-    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+    background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
     color: #fff;
-    box-shadow: 0 4px 15px rgba(155, 89, 182, 0.4);
+    box-shadow: 0 4px 15px rgba(196, 30, 58, 0.4);
 }
 
 .ai-btn:disabled {
-    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+    background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
     color: #fff;
-    border-color: #9b59b6;
+    border-color: #c41e3a;
 }
 
 /* AI 回复区域样式 */
 .ai-response-section {
-    background: linear-gradient(135deg, #f9f0ff 0%, #fff 100%);
-    border-left: 4px solid #9b59b6;
+    background: linear-gradient(135deg, #fff5f0 0%, #fff 100%);
+    border-left: 4px solid #c41e3a;
+}
+
+.ai-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.ai-section-header h2 {
+    margin: 0;
+}
+
+.ai-copy-btn {
+    padding: 8px 16px;
+    background: rgba(196, 30, 58, 0.1);
+    border: 1px solid #c41e3a;
+    color: #c41e3a;
+    font-size: 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ai-copy-btn:hover {
+    background: #c41e3a;
+    color: white;
+}
+
+.ai-copy-btn.copied {
+    background: rgba(46, 204, 113, 0.2);
+    border-color: #2ecc71;
+    color: #27ae60;
 }
 
 .ai-response-content {
@@ -1647,13 +1856,13 @@ body::before {
     color: #333;
     font-size: 15px;
     min-height: 60px;
-    box-shadow: 0 2px 10px rgba(155, 89, 182, 0.1);
+    box-shadow: 0 2px 10px rgba(196, 30, 58, 0.1);
 }
 
 /* AI 打字光标动画 */
 .ai-cursor {
     display: inline-block;
-    color: #9b59b6;
+    color: #c41e3a;
     animation: blink 0.8s ease-in-out infinite;
 }
 
@@ -1666,7 +1875,7 @@ body::before {
 .ai-response-content h1,
 .ai-response-content h2,
 .ai-response-content h3 {
-    color: #8e44ad;
+    color: #c41e3a;
     margin: 16px 0 10px 0;
     font-weight: 600;
 }
@@ -1690,13 +1899,13 @@ body::before {
 }
 
 .ai-response-content strong {
-    color: #6c3483;
+    color: #8b0000;
     font-weight: 600;
 }
 
 .ai-response-content hr {
     border: none;
-    border-top: 1px dashed #d8bfd8;
+    border-top: 1px dashed #ffe0d0;
     margin: 15px 0;
 }
 
@@ -1791,7 +2000,7 @@ body::before {
     justify-content: space-between;
     align-items: center;
     padding: 20px 25px;
-    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+    background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
     color: white;
 }
 
@@ -1809,6 +2018,33 @@ body::before {
     padding: 4px 12px;
     border-radius: 12px;
     margin: 0 15px;
+}
+
+/* AI 搜索弹窗厨房装饰 */
+.ai-search-decor {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    padding: 12px 0;
+    background: linear-gradient(180deg, #fff5f0 0%, #fff 100%);
+    border-bottom: 1px solid #ffe0d0;
+    font-size: 1.5rem;
+}
+
+.ai-search-decor span {
+    animation: decorFloat 2s ease-in-out infinite;
+    opacity: 0.7;
+}
+
+.ai-search-decor span:nth-child(1) { animation-delay: 0s; }
+.ai-search-decor span:nth-child(2) { animation-delay: 0.2s; }
+.ai-search-decor span:nth-child(3) { animation-delay: 0.4s; }
+.ai-search-decor span:nth-child(4) { animation-delay: 0.6s; }
+.ai-search-decor span:nth-child(5) { animation-delay: 0.8s; }
+
+@keyframes decorFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-5px) rotate(5deg); }
 }
 
 .ai-search-close-btn {
@@ -1849,10 +2085,10 @@ body::before {
 .ai-search-keyword {
     padding: 15px 25px;
     margin: 0;
-    background: #f9f0ff;
-    color: #8e44ad;
+    background: #fff5f0;
+    color: #c41e3a;
     font-size: 15px;
-    border-bottom: 1px solid #e8d4f0;
+    border-bottom: 1px solid #ffe0d0;
 }
 
 .ai-search-content {
@@ -1884,7 +2120,7 @@ body::before {
 .ai-search-result h1,
 .ai-search-result h2,
 .ai-search-result h3 {
-    color: #8e44ad;
+    color: #c41e3a;
     margin: 20px 0 12px 0;
     font-weight: 600;
 }
@@ -1904,12 +2140,12 @@ body::before {
 }
 
 .ai-search-result strong {
-    color: #6c3483;
+    color: #8b0000;
 }
 
 .ai-search-result hr {
     border: none;
-    border-top: 1px dashed #d8bfd8;
+    border-top: 1px dashed #ffe0d0;
     margin: 20px 0;
 }
 
@@ -1927,9 +2163,59 @@ body::before {
 
     .ai-search-header {
         padding: 15px 20px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .ai-search-header h2 {
+        font-size: 1.1rem;
+        flex: 1;
+    }
+
+    .ai-search-hint {
+        order: 4;
+        flex: 0 0 100%;
+        margin: 5px 0 0 0;
+        padding: 6px 12px;
+        font-size: 0.8rem;
     }
 
     .ai-search-content {
         padding: 20px;
+    }
+
+    .ai-search-decor {
+        font-size: 1.2rem;
+        gap: 15px;
+        padding: 10px 0;
+    }
+
+    /* 详情页按钮组移动端 */
+    .recommend-action {
+        margin-top: 12px !important;
+    }
+
+    .recommend-toggle-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 20px;
+    }
+
+    /* AI 回复区域移动端 */
+    .ai-response-content {
+        padding: 15px;
+        font-size: 14px;
+    }
+
+    .detail-info h1 {
+        font-size: 1.6rem;
+    }
+
+    .detail-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ingredients-list {
+        grid-template-columns: 1fr;
     }
 }

@@ -67,6 +67,9 @@
                 <button class="ai-search-copy-btn" id="aiSearchCopyBtn" onclick="copyAiSearchContent()" title="复制内容">📋 复制</button>
                 <button class="ai-search-close-btn" onclick="closeAiSearchModal(event, true)">&times;</button>
             </div>
+            <div class="ai-search-decor">
+                <span>🥄</span><span>🍴</span><span>🥢</span><span>🔪</span><span>🧂</span>
+            </div>
             <p class="ai-search-keyword" id="aiSearchKeyword">正在为您生成烹饪说明...</p>
             <div class="ai-search-content" id="aiSearchContent">
                 <div class="ai-search-loading">
@@ -132,8 +135,14 @@
 
         <!-- 空状态 -->
         <div id="emptyState" class="empty-state" style="display: none;">
-            <div class="icon">🍳</div>
-            <p>暂无菜谱数据</p>
+            <div class="empty-kitchen">
+                <div class="kitchen-shelf">
+                    <span>🍳</span><span>🥘</span><span>🍲</span>
+                </div>
+                <div class="empty-pot">🫕</div>
+                <div class="steam">~~~</div>
+            </div>
+            <p>厨房空空如也，快去添加菜谱吧！</p>
         </div>
     </div>
 
