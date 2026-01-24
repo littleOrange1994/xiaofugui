@@ -941,17 +941,27 @@ body::before {
     color: white;
 }
 
-.random-modal .btn-primary:hover {
+.random-modal .btn-primary:hover:not(:disabled) {
     background: #a01830;
 }
 
+.random-modal .btn-primary:disabled {
+    background: #d0d0d0 !important;
+    color: #888 !important;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
 .random-modal .btn-secondary {
-    background: #f0f0f0;
-    color: #666;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
 }
 
 .random-modal .btn-secondary:hover {
-    background: #e0e0e0;
+    background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .recipe-card-content {
@@ -1655,27 +1665,28 @@ body::before {
 }
 
 /* ========== AI 推荐加载动画 ========== */
-.ai-loading {
-    padding: 40px 20px;
-    text-align: center;
+.ai-loading-placeholder {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 15px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #fff5f5 0%, #ffe8dc 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
 }
 
-.ai-loading-icon {
-    font-size: 3rem;
-    animation: aiPulse 1.5s ease-in-out infinite;
-    margin-bottom: 15px;
+.loading-food-slot {
+    font-size: 4rem;
+    animation: slotMachine 0.3s ease-in-out infinite;
 }
 
-@keyframes aiPulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.1); opacity: 0.7; }
-}
-
-.ai-loading-text {
-    color: #9b59b6;
-    font-size: 1rem;
-    font-weight: 500;
-    letter-spacing: 1px;
+@keyframes slotMachine {
+    0% { transform: translateY(-20px); opacity: 0.5; }
+    50% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(20px); opacity: 0.5; }
 }
 
 /* ========== AI 推荐理由卡片 ========== */
@@ -1689,6 +1700,9 @@ body::before {
     align-items: flex-start;
     gap: 10px;
     text-align: left;
+    min-height: 100px;
+    max-height: 100px;
+    overflow: hidden;
 }
 
 .ai-reason-icon {

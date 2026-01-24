@@ -335,13 +335,58 @@ function escapeHtml(text) {
 
 // ========== 今天吃什么功能 ==========
 
+// 季节文案库
+const SEASON_TIPS = {
+    spring: [
+        '春眠不觉晓，吃饱才能跑 🏃 万物复苏的季节，胃也该醒醒了 😋',
+        '春风十里不如你做的饭香 🌷 减肥是不可能的，这辈子都不可能 🤤',
+        '春天来了，肉肉藏不住了 😱 但先吃饱再说，毕竟饿着没力气减肥 💪',
+        '春暖花开，食欲大开 🌸 不吃饱哪有力气欣赏春光 🦋',
+        '一年之计在于春，一日之计在于吃 🍽️ 干饭人永不认输 ✊'
+    ],
+    summer: [
+        '热到和太阳称兄道弟 🔥 命都是空调和冰镇西瓜给的 🍉',
+        '出门五分钟，流汗两小时 💦 这种天气只想躺着吃 🛋️',
+        '热得像红烧肉 🥵 但该吃还得吃，毕竟是个敬业的干饭人 🍚',
+        '夏天的命是冰奶茶给的 🧋 当然还有各种好吃的续命 😎',
+        '三伏天热成狗 🐕 只有美食能拯救我这条咸鱼 🐟'
+    ],
+    autumn: [
+        '秋风起，贴膘忙 🐷 瘦了一夏天，该把肉补回来了 💪',
+        '秋天的第一杯奶茶喝了，第一顿大餐也得安排上 🍂',
+        '天凉好个秋，胃口大如牛 🐂 不吃对不起这凉爽的天气 🍁',
+        '秋高气爽，最适合干饭 🌾 毕竟冬天还要靠这身膘过冬 ❄️',
+        '都说秋天是收获的季节 🎃 那我就收获一下体重吧 😂'
+    ],
+    winter: [
+        '外面冷得像冰箱 🥶 不吃点热乎的怎么对得起这哆嗦的身体 🍲',
+        '冬天就是要吃肉肉 🍖 脂肪是对寒冷最大的尊重 🧣',
+        '瑟瑟发抖的季节 ❄️ 只有热气腾腾的美食能温暖我 🫕',
+        '冬天不长膘，来年春天跑不掉 🏃 先吃为敬 🙏',
+        '北风那个吹，雪花那个飘 ☃️ 躲在家里吃火锅才是正经事 🔥'
+    ]
+};
+
 // 获取当前季节
 function getCurrentSeason() {
     const month = new Date().getMonth() + 1;
-    if (month >= 3 && month <= 5) return { name: '春季', tip: '春季养生 · 清淡为主', categories: ['蒸菜', '汤类', '凉拌'] };
-    if (month >= 6 && month <= 8) return { name: '夏季', tip: '夏季消暑 · 清凉解腻', categories: ['凉拌', '饮品', '汤类'] };
-    if (month >= 9 && month <= 11) return { name: '秋季', tip: '秋季进补 · 润燥滋养', categories: ['炖菜', '汤类', '蒸菜'] };
-    return { name: '冬季', tip: '冬季暖身 · 滋补养生', categories: ['炖菜', '砂锅菜', '煮锅', '汤类'] };
+    let name, tips;
+    if (month >= 3 && month <= 5) {
+        name = '🌸 春季';
+        tips = SEASON_TIPS.spring;
+    } else if (month >= 6 && month <= 8) {
+        name = '☀️ 夏季';
+        tips = SEASON_TIPS.summer;
+    } else if (month >= 9 && month <= 11) {
+        name = '🍂 秋季';
+        tips = SEASON_TIPS.autumn;
+    } else {
+        name = '❄️ 冬季';
+        tips = SEASON_TIPS.winter;
+    }
+    // 随机选择一条文案
+    const tip = tips[Math.floor(Math.random() * tips.length)];
+    return { name, tip };
 }
 
 // 显示 AI 推荐菜谱
@@ -351,9 +396,30 @@ async function showRandomRecipe() {
     const seasonTip = document.getElementById('seasonTip');
     const viewBtn = document.getElementById('viewRandomBtn');
 
-    // 显示 AI 加载状态
-    preview.innerHTML = '<div class="ai-loading"><div class="ai-loading-icon">🤖</div><div class="ai-loading-text">AI 正在为您精选...</div></div>';
+    // 显示 AI 加载状态，禁用查看详情按钮，保持和结果一致的布局
+    preview.innerHTML = `
+        <div class="ai-loading-placeholder">
+            <div class="loading-food-slot" id="foodSlot">🍜</div>
+        </div>
+        <h3>AI 正在为您精选...</h3>
+        <p style="color:#888;margin-top:10px;">稍等片刻，美味即将揭晓 ✨</p>
+        <div class="ai-reason-card ai-reason-loading">
+            <span class="ai-reason-icon">🤖</span>
+            <span class="ai-reason-text">正在思考推荐理由中...</span>
+        </div>
+    `;
+    viewBtn.disabled = true;
+    viewBtn.onclick = null;
     modal.classList.add('show');
+
+    // 老虎机滚动食物图标
+    const foodEmojis = ['🍜', '🍲', '🍖', '🍗', '🥘', '🍛', '🍝', '🥗', '🍳', '🥩', '🍤', '🦐', '🐟', '🥟', '🫕'];
+    const foodSlot = document.getElementById('foodSlot');
+    const slotInterval = setInterval(() => {
+        if (foodSlot) {
+            foodSlot.textContent = foodEmojis[Math.floor(Math.random() * foodEmojis.length)];
+        }
+    }, 150);
 
     // 先显示通用季节提示
     const season = getCurrentSeason();
@@ -367,13 +433,11 @@ async function showRandomRecipe() {
         });
         const result = await response.json();
 
-        if (result.code === 0 && result.data && result.data.recipe) {
-            const { recipe, reason, seasonTip: aiSeasonTip } = result.data;
+        // 停止老虎机动画
+        clearInterval(slotInterval);
 
-            // 更新季节提示
-            if (aiSeasonTip) {
-                seasonTip.textContent = aiSeasonTip;
-            }
+        if (result.code === 0 && result.data && result.data.recipe) {
+            const { recipe, reason } = result.data;
 
             // 渲染推荐菜品
             preview.innerHTML = `
@@ -388,16 +452,20 @@ async function showRandomRecipe() {
                 ${reason ? `<div class="ai-reason-card"><span class="ai-reason-icon">🤖</span><span class="ai-reason-text">${escapeHtml(reason)}</span></div>` : ''}
             `;
 
-            // 设置查看详情按钮
+            // 设置查看详情按钮并启用
+            viewBtn.disabled = false;
             viewBtn.onclick = () => {
                 viewRecipe(recipe.id);
             };
         } else {
             preview.innerHTML = '<div style="padding: 40px; color: #999;">暂无推荐，请稍后再试</div>';
+            viewBtn.disabled = true;
         }
     } catch (error) {
+        clearInterval(slotInterval);
         console.error('获取 AI 推荐失败:', error);
         preview.innerHTML = '<div style="padding: 40px; color: #999;">获取推荐失败，请稍后再试</div>';
+        viewBtn.disabled = true;
     }
 }
 
