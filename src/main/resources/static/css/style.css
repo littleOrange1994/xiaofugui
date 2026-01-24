@@ -1566,3 +1566,90 @@ body::before {
     opacity: 0.6;
     cursor: not-allowed;
 }
+
+/* ========== AI 一下按钮样式 ========== */
+.ai-btn {
+    border-color: #9b59b6;
+    color: #8e44ad;
+    background: linear-gradient(135deg, #fff 0%, #f9f0ff 100%);
+    box-shadow: 0 2px 8px rgba(155, 89, 182, 0.2);
+}
+
+.ai-btn:hover {
+    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(155, 89, 182, 0.4);
+}
+
+.ai-btn:disabled {
+    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+    color: #fff;
+    border-color: #9b59b6;
+}
+
+/* AI 回复区域样式 */
+.ai-response-section {
+    background: linear-gradient(135deg, #f9f0ff 0%, #fff 100%);
+    border-left: 4px solid #9b59b6;
+}
+
+.ai-response-content {
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    line-height: 1.8;
+    color: #333;
+    font-size: 15px;
+    min-height: 60px;
+    box-shadow: 0 2px 10px rgba(155, 89, 182, 0.1);
+}
+
+/* AI 打字光标动画 */
+.ai-cursor {
+    display: inline-block;
+    color: #9b59b6;
+    animation: blink 0.8s ease-in-out infinite;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* AI 回复内容中的 Markdown 样式 */
+.ai-response-content h1,
+.ai-response-content h2,
+.ai-response-content h3 {
+    color: #8e44ad;
+    margin: 16px 0 10px 0;
+    font-weight: 600;
+}
+
+.ai-response-content h1 { font-size: 1.4rem; }
+.ai-response-content h2 { font-size: 1.2rem; }
+.ai-response-content h3 { font-size: 1.1rem; }
+
+.ai-response-content p {
+    margin: 10px 0;
+}
+
+.ai-response-content ul,
+.ai-response-content ol {
+    margin: 10px 0;
+    padding-left: 24px;
+}
+
+.ai-response-content li {
+    margin: 6px 0;
+}
+
+.ai-response-content strong {
+    color: #6c3483;
+    font-weight: 600;
+}
+
+.ai-response-content hr {
+    border: none;
+    border-top: 1px dashed #d8bfd8;
+    margin: 15px 0;
+}

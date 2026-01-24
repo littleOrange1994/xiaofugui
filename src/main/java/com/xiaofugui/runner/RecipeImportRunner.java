@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  * 菜谱数据导入（支持从 classpath 读取）
  */
 @Slf4j
-@Component
+//@Component
 @RequiredArgsConstructor
 public class RecipeImportRunner implements CommandLineRunner {
 
