@@ -344,54 +344,59 @@ function getCurrentSeason() {
     return { name: '冬季', tip: '冬季暖身 · 滋补养生', categories: ['炖菜', '砂锅菜', '煮锅', '汤类'] };
 }
 
-// 显示随机菜谱
+// 显示 AI 推荐菜谱
 async function showRandomRecipe() {
     const modal = document.getElementById('randomModal');
     const preview = document.getElementById('randomRecipePreview');
     const seasonTip = document.getElementById('seasonTip');
     const viewBtn = document.getElementById('viewRandomBtn');
 
-    // 显示加载状态
-    preview.innerHTML = '<div style="padding: 40px; color: #999;">🎲 正在为您挑选...</div>';
+    // 显示 AI 加载状态
+    preview.innerHTML = '<div class="ai-loading"><div class="ai-loading-icon">🤖</div><div class="ai-loading-text">AI 正在为您精选...</div></div>';
     modal.classList.add('show');
 
-    // 设置季节提示
+    // 先显示通用季节提示
     const season = getCurrentSeason();
     seasonTip.textContent = `${season.name}推荐 · ${season.tip}`;
 
     try {
-        // 随机选择一个适合季节的分类
-        const category = season.categories[Math.floor(Math.random() * season.categories.length)];
-
-        // 获取该分类的菜谱
-        const response = await fetch(`${API_BASE}?page=1&pageSize=50&category=${encodeURIComponent(category)}`);
+        // 调用 AI 推荐接口
+        const response = await fetch(`${API_BASE}/ai-recommend`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
         const result = await response.json();
 
-        if (result.code === 0 && result.data && result.data.records.length > 0) {
-            const recipes = result.data.records;
-            const randomRecipe = recipes[Math.floor(Math.random() * recipes.length)];
+        if (result.code === 0 && result.data && result.data.recipe) {
+            const { recipe, reason, seasonTip: aiSeasonTip } = result.data;
+
+            // 更新季节提示
+            if (aiSeasonTip) {
+                seasonTip.textContent = aiSeasonTip;
+            }
 
             // 渲染推荐菜品
             preview.innerHTML = `
-                ${randomRecipe.imageUrl
-                    ? `<img src="${randomRecipe.imageUrl}" alt="${randomRecipe.name}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22>🍲</text></svg>'">`
+                ${recipe.imageUrl
+                    ? `<img src="${recipe.imageUrl}" alt="${recipe.name}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22>🍲</text></svg>'">`
                     : '<div style="width:150px;height:150px;background:#fff5f5;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:4rem;margin:0 auto 15px;">🍲</div>'
                 }
-                <h3>${escapeHtml(randomRecipe.name)}</h3>
+                <h3>${escapeHtml(recipe.name)}</h3>
                 <p style="color:#888;margin-top:10px;">
-                    ${randomRecipe.category || ''} · ${getDifficultyText(randomRecipe.difficulty)} · ${getSpicyLevel(randomRecipe.spicyLevel)}
+                    ${recipe.category || ''} · ${getDifficultyText(recipe.difficulty)} · ${getSpicyLevel(recipe.spicyLevel)}
                 </p>
+                ${reason ? `<div class="ai-reason-card"><span class="ai-reason-icon">🤖</span><span class="ai-reason-text">${escapeHtml(reason)}</span></div>` : ''}
             `;
 
             // 设置查看详情按钮
             viewBtn.onclick = () => {
-                viewRecipe(randomRecipe.id);
+                viewRecipe(recipe.id);
             };
         } else {
             preview.innerHTML = '<div style="padding: 40px; color: #999;">暂无推荐，请稍后再试</div>';
         }
     } catch (error) {
-        console.error('获取随机菜谱失败:', error);
+        console.error('获取 AI 推荐失败:', error);
         preview.innerHTML = '<div style="padding: 40px; color: #999;">获取推荐失败，请稍后再试</div>';
     }
 }

@@ -1,8 +1,10 @@
 package com.xiaofugui.controller;
 
+import com.xiaofugui.dto.AiRecommendResponse;
 import com.xiaofugui.dto.PageResult;
 import com.xiaofugui.dto.Result;
 import com.xiaofugui.entity.Recipe;
+import com.xiaofugui.service.AiRecommendService;
 import com.xiaofugui.service.RecipeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class RecipeController {
 
     private final RecipeService recipeService;
+    private final AiRecommendService aiRecommendService;
 
     /**
      * 分页查询菜谱列表
@@ -100,5 +103,14 @@ public class RecipeController {
             return Result.error("菜品不存在或删除失败");
         }
         return Result.success();
+    }
+
+    /**
+     * AI 智能推荐菜品
+     */
+    @PostMapping("/ai-recommend")
+    public Result<AiRecommendResponse> aiRecommend() {
+        AiRecommendResponse response = aiRecommendService.recommend();
+        return Result.success(response);
     }
 }

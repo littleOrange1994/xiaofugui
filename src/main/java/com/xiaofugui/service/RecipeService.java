@@ -9,6 +9,8 @@ import com.xiaofugui.mapper.RecipeMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * 菜谱服务
  */
@@ -97,5 +99,14 @@ public class RecipeService {
         wrapper.eq("recommended", 1);
         Page<Recipe> result = recipeMapper.selectPage(pageParam, wrapper);
         return new PageResult<>(result.getTotal(), result.getRecords());
+    }
+
+    /**
+     * 获取所有菜品摘要（用于 AI 推荐）
+     */
+    public List<Recipe> getAllRecipeSummaries() {
+        QueryWrapper<Recipe> wrapper = new QueryWrapper<>();
+        wrapper.select("id", "name", "category", "cuisine_type", "spicy_level", "season_tags");
+        return recipeMapper.selectList(wrapper);
     }
 }
