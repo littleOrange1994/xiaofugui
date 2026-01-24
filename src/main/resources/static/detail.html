@@ -139,17 +139,18 @@
         document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
             const id = urlParams.get('id');
+            const autoAI = urlParams.get('autoAI') === 'true';
 
             if (!id) {
                 showError('缺少菜谱 ID');
                 return;
             }
 
-            loadRecipeDetail(id);
+            loadRecipeDetail(id, autoAI);
         });
 
         // 加载菜谱详情
-        async function loadRecipeDetail(id) {
+        async function loadRecipeDetail(id, autoAI = false) {
             try {
                 const response = await fetch(`${API_BASE}/${id}`);
                 const result = await response.json();
@@ -158,6 +159,20 @@
                     currentRecipe = result.data;
                     renderDetail(result.data);
                     loadWeeklyPlanStatus(result.data.id);
+
+                    // 如果带有 autoAI 参数，自动触发 AI
+                    if (autoAI) {
+                        setTimeout(() => {
+                            askAI();
+                            // 滚动到 AI 按钮位置，让用户能看到按钮和 AI 输出
+                            setTimeout(() => {
+                                const aiBtn = document.getElementById('aiBtn');
+                                if (aiBtn) {
+                                    aiBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                }
+                            }, 30);
+                        }, 300);
+                    }
                 } else {
                     showError(result.message || '菜谱不存在');
                 }

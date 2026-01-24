@@ -197,7 +197,10 @@ function renderRecipes() {
                 </div>
             </div>
             <div class="recipe-card-content">
-                <h3>${escapeHtml(recipe.name)}</h3>
+                <div class="recipe-card-title">
+                    <h3>${escapeHtml(recipe.name)}</h3>
+                    <button class="card-ai-btn" onclick="event.stopPropagation(); goToDetailWithAI(${recipe.id})">🤖 AI一下</button>
+                </div>
                 <div class="recipe-card-meta">
                     ${recipe.category ? `<span class="meta-tag cuisine">${escapeHtml(recipe.category)}</span>` : ''}
                     ${recipe.difficulty ? `<span class="meta-tag difficulty">${getDifficultyText(recipe.difficulty)}</span>` : ''}
@@ -249,6 +252,21 @@ function viewRecipe(id) {
     const params = new URLSearchParams();
     params.set('id', id);
     params.set('page', state.currentPage);
+    if (state.category) {
+        params.set('category', state.category);
+    }
+    if (state.searchKeyword) {
+        params.set('search', state.searchKeyword);
+    }
+    window.location.href = `detail.html?${params.toString()}`;
+}
+
+// 跳转到详情页并自动触发 AI
+function goToDetailWithAI(id) {
+    const params = new URLSearchParams();
+    params.set('id', id);
+    params.set('page', state.currentPage);
+    params.set('autoAI', 'true');
     if (state.category) {
         params.set('category', state.category);
     }

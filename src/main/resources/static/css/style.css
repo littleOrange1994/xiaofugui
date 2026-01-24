@@ -974,6 +974,42 @@ body::before {
     color: #333;
 }
 
+/* 卡片标题行（名称 + AI按钮） */
+.recipe-card-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.recipe-card-title h3 {
+    margin: 0;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.card-ai-btn {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.card-ai-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(155, 89, 182, 0.4);
+}
+
 .recipe-card-meta {
     display: flex;
     flex-wrap: wrap;
