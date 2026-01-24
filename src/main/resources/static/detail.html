@@ -534,17 +534,16 @@
                     for (const line of lines) {
                         if (line.startsWith('data:')) {
                             const data = line.substring(5);
-                            // 只添加非空内容
                             if (data) {
                                 fullContent += data;
                             }
                         }
                     }
-                    // 实时更新页面（不做预处理，避免流式过程中格式错乱）
-                    responseContent.innerHTML = escapeHtml(fullContent).replace(/\n/g, '<br>') + '<span class="ai-cursor">|</span>';
+                    // 实时更新页面，使用 Markdown 解析
+                    responseContent.innerHTML = formatAIResponse(fullContent) + '<span class="ai-cursor">|</span>';
                 }
 
-                // 完成后用 Markdown 解析完整内容
+                // 完成后移除光标
                 responseContent.innerHTML = formatAIResponse(fullContent);
 
             } catch (error) {
@@ -566,12 +565,18 @@
             if (!text) return '';
             // 预处理：修复常见的 Markdown 格式问题
             let processed = text;
-            // 在 ### 标题前添加换行（如果前面不是换行）
-            processed = processed.replace(/([^\n])(#{1,3}\s)/g, '$1\n$2');
-            // 在序号列表前添加换行（如 1. 2. 3.）
-            processed = processed.replace(/([^\n])(\d+\.\s)/g, '$1\n$2');
-            // 在 - 列表项前添加换行
-            processed = processed.replace(/([^\n])([-*]\s)/g, '$1\n$2');
+            // 处理 --- 分隔线（前后加换行）
+            processed = processed.replace(/---+/g, '\n\n---\n\n');
+            // 处理 ### 标题（前面加换行）
+            processed = processed.replace(/(#{1,3})\s*/g, '\n\n$1 ');
+            // 处理序号列表（1. 2. 3. 前面加换行）
+            processed = processed.replace(/(\d+)\.\s*/g, '\n$1. ');
+            // 处理 - 列表项（前面加换行，注意避免影响 ---）
+            processed = processed.replace(/([^\n-])-\s+/g, '$1\n- ');
+            // 清理多余的连续换行（最多保留2个）
+            processed = processed.replace(/\n{3,}/g, '\n\n');
+            // 去掉开头的换行
+            processed = processed.replace(/^\n+/, '');
             // 使用 marked 解析 Markdown
             return marked.parse(processed);
         }
