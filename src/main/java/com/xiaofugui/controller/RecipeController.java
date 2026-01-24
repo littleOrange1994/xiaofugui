@@ -7,7 +7,9 @@ import com.xiaofugui.entity.Recipe;
 import com.xiaofugui.service.AiRecommendService;
 import com.xiaofugui.service.RecipeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 
 /**
  * 菜谱接口
@@ -112,5 +114,13 @@ public class RecipeController {
     public Result<AiRecommendResponse> aiRecommend() {
         AiRecommendResponse response = aiRecommendService.recommend();
         return Result.success(response);
+    }
+
+    /**
+     * AI 搜索 - 根据关键词生成烹饪说明（SSE 流式返回）
+     */
+    @GetMapping(value = "/ai-search", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> aiSearchStream(@RequestParam String keyword) {
+        return aiRecommendService.aiSearchStream(keyword);
     }
 }

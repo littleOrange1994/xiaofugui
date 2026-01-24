@@ -58,6 +58,25 @@
         </div>
     </div>
 
+    <!-- AI 搜索弹窗 -->
+    <div id="aiSearchModal" class="ai-search-modal" onclick="closeAiSearchModal(event)">
+        <div class="ai-search-modal-content" onclick="event.stopPropagation()">
+            <div class="ai-search-header">
+                <h2>🤖 AI 烹饪助手</h2>
+                <span class="ai-search-hint">菜谱库中未找到，AI 为您生成</span>
+                <button class="ai-search-copy-btn" id="aiSearchCopyBtn" onclick="copyAiSearchContent()" title="复制内容">📋 复制</button>
+                <button class="ai-search-close-btn" onclick="closeAiSearchModal(event, true)">&times;</button>
+            </div>
+            <p class="ai-search-keyword" id="aiSearchKeyword">正在为您生成烹饪说明...</p>
+            <div class="ai-search-content" id="aiSearchContent">
+                <div class="ai-search-loading">
+                    <div class="ai-search-loading-icon">🍳</div>
+                    <p>AI 正在思考中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 小曾推荐 - 独立展示区 -->
     <div class="container">
         <div class="recommend-showcase">

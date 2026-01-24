@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -279,5 +280,42 @@ public class AiRecommendService {
         }
 
         return "";
+    }
+
+    private static final String AI_SEARCH_PROMPT = """
+            你是专业厨师，用户想做"%s"。
+            请提供详细的烹饪说明，包括：
+            1. 所需食材和用量
+            2. 详细步骤
+            3. 小贴士
+            
+            用 Markdown 格式输出。
+            """;
+
+    /**
+     * AI 搜索 - 根据关键词生成烹饪说明（SSE 流式返回）
+     */
+    public Flux<String> aiSearchStream(String keyword) {
+        if (StrUtil.isBlank(keyword)) {
+            return Flux.just("请输入要搜索的菜品名称");
+        }
+
+        try {
+            String prompt = String.format(AI_SEARCH_PROMPT, keyword);
+            ChatClient chatClient = chatClientBuilder.build();
+
+            return chatClient.prompt()
+                    .user(prompt)
+                    .stream()
+                    .content()
+                    .doOnComplete(() -> log.info("AI 搜索流式响应完成, 关键词: {}", keyword))
+                    .onErrorResume(e -> {
+                        log.error("AI 搜索失败, 关键词: {}", keyword, e);
+                        return Flux.just("AI 搜索失败，请稍后重试");
+                    });
+        } catch (Exception e) {
+            log.error("AI 搜索初始化失败, 关键词: {}", keyword, e);
+            return Flux.just("AI 搜索失败，请稍后重试");
+        }
     }
 }

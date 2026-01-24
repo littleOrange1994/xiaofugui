@@ -173,7 +173,13 @@ function renderRecipes() {
 
     if (state.recipes.length === 0) {
         grid.innerHTML = '';
-        emptyState.style.display = 'block';
+        // 如果是搜索模式且没有结果，自动触发 AI 搜索
+        if (state.searchKeyword) {
+            emptyState.style.display = 'none';
+            showAiSearch(state.searchKeyword);
+        } else {
+            emptyState.style.display = 'block';
+        }
         return;
     }
 
@@ -537,4 +543,150 @@ function optimizeFloatingAnimation() {
             });
         }, 300);
     }, { passive: true });
+}
+
+// ========== AI 搜索功能 ==========
+
+// 当前 AI 搜索的 EventSource 实例
+let currentAiSearchEventSource = null;
+// 当前 AI 搜索的原始内容（用于复制）
+let currentAiSearchContent = '';
+
+/**
+ * 显示 AI 搜索弹窗并调用 AI 生成烹饪说明（SSE 流式）
+ */
+function showAiSearch(keyword) {
+    const modal = document.getElementById('aiSearchModal');
+    const keywordEl = document.getElementById('aiSearchKeyword');
+    const contentEl = document.getElementById('aiSearchContent');
+
+    // 关闭之前的连接
+    if (currentAiSearchEventSource) {
+        currentAiSearchEventSource.close();
+        currentAiSearchEventSource = null;
+    }
+
+    // 重置内容
+    currentAiSearchContent = '';
+
+    // 显示弹窗和加载状态
+    keywordEl.textContent = `正在为您生成「${keyword}」的烹饪说明...`;
+    contentEl.innerHTML = `
+        <div class="ai-search-loading">
+            <div class="ai-search-loading-icon">🍳</div>
+            <p>AI 正在思考中...</p>
+        </div>
+    `;
+    modal.classList.add('show');
+
+    // 使用 EventSource 接收 SSE 流
+    let fullContent = '';
+    const eventSource = new EventSource(`${API_BASE}/ai-search?keyword=${encodeURIComponent(keyword)}`);
+    currentAiSearchEventSource = eventSource;
+
+    eventSource.onmessage = function(event) {
+        // 更新标题
+        if (fullContent === '') {
+            keywordEl.textContent = `「${keyword}」的烹饪说明`;
+        }
+
+        // 累积内容
+        fullContent += event.data;
+        currentAiSearchContent = fullContent;
+
+        // 实时渲染 Markdown
+        contentEl.innerHTML = `<div class="ai-search-result">${renderMarkdown(fullContent)}<span class="ai-cursor">▌</span></div>`;
+
+        // 滚动到底部
+        contentEl.scrollTop = contentEl.scrollHeight;
+    };
+
+    eventSource.onerror = function(error) {
+        eventSource.close();
+        currentAiSearchEventSource = null;
+
+        if (fullContent) {
+            // 已有内容，移除光标
+            contentEl.innerHTML = `<div class="ai-search-result">${renderMarkdown(fullContent)}</div>`;
+        } else {
+            // 没有内容，显示错误
+            contentEl.innerHTML = `<div class="ai-search-error">获取烹饪说明失败，请稍后重试</div>`;
+        }
+    };
+
+    eventSource.onopen = function() {
+        console.log('AI 搜索 SSE 连接已建立');
+    };
+}
+
+/**
+ * 关闭 AI 搜索弹窗
+ */
+function closeAiSearchModal(event, forceClose) {
+    if (forceClose || event.target.id === 'aiSearchModal') {
+        // 关闭 SSE 连接
+        if (currentAiSearchEventSource) {
+            currentAiSearchEventSource.close();
+            currentAiSearchEventSource = null;
+        }
+        document.getElementById('aiSearchModal').classList.remove('show');
+    }
+}
+
+/**
+ * 复制 AI 搜索内容
+ */
+async function copyAiSearchContent() {
+    if (!currentAiSearchContent) {
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(currentAiSearchContent);
+        const btn = document.getElementById('aiSearchCopyBtn');
+        btn.textContent = '✅ 已复制';
+        btn.classList.add('copied');
+        setTimeout(() => {
+            btn.textContent = '📋 复制';
+            btn.classList.remove('copied');
+        }, 2000);
+    } catch (err) {
+        console.error('复制失败:', err);
+    }
+}
+
+/**
+ * 简单的 Markdown 渲染（支持标题、列表、加粗、分隔线）
+ */
+function renderMarkdown(text) {
+    if (!text) return '';
+
+    return text
+        // 转义 HTML
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        // 标题
+        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+        // 加粗
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        // 分隔线
+        .replace(/^---$/gm, '<hr>')
+        // 无序列表
+        .replace(/^- (.+)$/gm, '<li>$1</li>')
+        .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
+        // 有序列表
+        .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
+        // 段落
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>')
+        // 包裹段落
+        .replace(/^(.+)$/gm, function(match) {
+            if (match.startsWith('<h') || match.startsWith('<ul') || match.startsWith('<ol') || match.startsWith('<hr') || match.startsWith('<li')) {
+                return match;
+            }
+            return match;
+        });
 }
