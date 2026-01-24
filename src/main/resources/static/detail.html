@@ -120,6 +120,14 @@
         // 当前菜谱数据
         let currentRecipe = null;
 
+        // AI 流式输出自动滚动控制：用户一旦手动滚动过页面，本次输出就不再自动滚动
+        let aiStreamingActive = false;
+        let aiAutoScrollDisabledByUser = false;
+        let aiAutoScrolling = false;
+        let aiAutoScrollGuardInited = false;
+        let aiAutoScrollRafId = 0;
+        let aiAutoScrollPending = 0;
+
         /**
          * 返回列表页并恢复之前的状态
          * 读取URL中的page、category、search参数，构造返回URL
@@ -146,6 +154,8 @@
 
         // 页面加载时获取详情
         document.addEventListener('DOMContentLoaded', function() {
+            initAiAutoScrollGuard();
+
             const urlParams = new URLSearchParams(window.location.search);
             const id = urlParams.get('id');
             const autoAI = urlParams.get('autoAI') === 'true';
@@ -518,7 +528,15 @@
             responseSection.style.display = 'block';
             responseKeyword.textContent = `「${currentRecipe.name}」的烹饪说明`;
             responseContent.innerHTML = '<div class="ai-loading-hint">AI 正在思考中...</div>';
-            scrollAiResponseIntoView();
+
+            // 本次 AI 输出开始：默认允许自动滚动；用户只要手动滚动一次就会关闭
+            aiStreamingActive = true;
+            aiAutoScrollDisabledByUser = false;
+            aiAutoScrollPending = 0;
+            if (aiAutoScrollRafId) {
+                cancelAnimationFrame(aiAutoScrollRafId);
+                aiAutoScrollRafId = 0;
+            }
 
             const systemPrompt = '你是一个幽默风趣的专业厨师，精通各种菜品的做法。回复要求：1.不要使用Markdown格式（不要用#、**、-、•等符号）；2.步骤用"第一步"、"第二步"表述，每一步必须单独一行，步骤之间要换行；3.食材清单每种食材单独一行；4.语言风格轻松幽默，可以加入俏皮话；5.做法必须详细完整，食材用量准确，步骤不能省略，火候时间要具体。';
             const userMessage = `请介绍一下"${currentRecipe.name}"这道菜`;
@@ -562,7 +580,7 @@
                     // 实时更新页面
                     responseContent.innerHTML = formatSseContent(fullContent) + '<span class="ai-cursor">|</span>';
                     currentAiResponseContent = fullContent;
-                    scrollAiResponseToBottom();
+                    autoScrollAiResponseDuringStreaming();
                 }
 
                 // 处理缓存中剩余的数据
@@ -573,12 +591,13 @@
                 // 完成后移除光标
                 responseContent.innerHTML = formatSseContent(fullContent);
                 currentAiResponseContent = fullContent;
-                scrollAiResponseToBottom();
+                autoScrollAiResponseDuringStreaming();
 
             } catch (error) {
                 console.error('AI 请求失败:', error);
                 responseContent.innerHTML = '<p style="color: #e74c3c;">AI 请求失败，请稍后重试</p>';
             } finally {
+                aiStreamingActive = false;
                 // 恢复按钮状态
                 btn.disabled = false;
                 icon.textContent = '🤖';
@@ -587,26 +606,70 @@
         }
 
         /**
-         * 将 AI 回复区域滚动到视口垂直居中
+         * 初始化：监听用户手动滚动，一旦发生则关闭本次 AI 输出的自动滚动
          */
-        function scrollAiResponseIntoView() {
-            const responseSection = document.getElementById('aiResponseSection');
-            if (!responseSection) return;
+        function initAiAutoScrollGuard() {
+            if (aiAutoScrollGuardInited) return;
+            aiAutoScrollGuardInited = true;
 
-            requestAnimationFrame(() => {
-                responseSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const disableAutoScroll = () => {
+                if (!aiStreamingActive) return;
+                aiAutoScrollDisabledByUser = true;
+            };
+
+            window.addEventListener('wheel', disableAutoScroll, { passive: true });
+            window.addEventListener('touchmove', disableAutoScroll, { passive: true });
+            window.addEventListener('scroll', () => {
+                if (!aiStreamingActive) return;
+                if (aiAutoScrolling) return;
+                // 拖动滚动条等场景不会触发 wheel，这里兜底
+                aiAutoScrollDisabledByUser = true;
+            }, { passive: true });
+
+            window.addEventListener('keydown', (e) => {
+                if (!aiStreamingActive) return;
+                const keys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '];
+                if (keys.includes(e.key)) {
+                    aiAutoScrollDisabledByUser = true;
+                }
             });
         }
 
         /**
-         * 将 AI 回复区域底部滚动到视口内
+         * 流式输出阶段自动滚动（仅当用户未手动滚动时生效）
          */
-        function scrollAiResponseToBottom() {
+        function autoScrollAiResponseDuringStreaming() {
+            if (!aiStreamingActive) return;
+            if (aiAutoScrollDisabledByUser) return;
+
             const responseSection = document.getElementById('aiResponseSection');
             if (!responseSection) return;
 
-            requestAnimationFrame(() => {
-                responseSection.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            const rect = responseSection.getBoundingClientRect();
+            const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+            const bottomGap = 16;
+            const overflow = rect.bottom - (viewportHeight - bottomGap);
+            if (overflow <= 0) return;
+
+            // 合并频繁的滚动请求，避免抖动
+            aiAutoScrollPending = Math.max(aiAutoScrollPending, overflow);
+            if (aiAutoScrollRafId) return;
+
+            aiAutoScrollRafId = requestAnimationFrame(() => {
+                aiAutoScrollRafId = 0;
+
+                if (!aiStreamingActive) return;
+                if (aiAutoScrollDisabledByUser) return;
+
+                const delta = aiAutoScrollPending;
+                aiAutoScrollPending = 0;
+                if (delta <= 0) return;
+
+                aiAutoScrolling = true;
+                window.scrollBy({ top: delta, left: 0, behavior: 'auto' });
+                setTimeout(() => {
+                    aiAutoScrolling = false;
+                }, 120);
             });
         }
 

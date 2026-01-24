@@ -796,6 +796,7 @@ body::before {
 .random-btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     padding: 12px 28px;
     background: linear-gradient(135deg, #f39c12, #e67e22);
@@ -823,6 +824,7 @@ body::before {
 .weekly-plan-btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     padding: 12px 28px;
     background: linear-gradient(135deg, #2ecc71, #27ae60);
