@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:mysql://115.191.20.121:3306/xiaofugui?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-    username: root
-    password: caicaicai123
+    url:
+    username:
+    password:
 
 mybatis-plus:
   configuration:
